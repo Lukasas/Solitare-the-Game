@@ -5,7 +5,7 @@
 
 enum Cards
 {
-    CACE,    C1,    C2,
+    PLACEHOLDER,    CACE,    C2,
     C3,    C4,    C5,
     C6,    C7,    C8,
     C9,    C10,    CJ,
@@ -46,7 +46,7 @@ public:
      * @return
      *      Returns an integer depenting on selected Card
      *      0 1 2 3 4 5 6 7 8 9 10 11 12 13
-     *      A 1 2 3 4 5 6 7 8 9 10  J  Q  K
+     *      P A 2 3 4 5 6 7 8 9 10  J  Q  K
      */
     Cards iGetCardValue() const;
     /**

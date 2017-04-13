@@ -4,8 +4,8 @@
 /// one_H.png (Heath) one_D.png (Diamond) one_S.png (Spade) one_C.png (Club)
 QString BaseCardPaths[14] =
 {
+    "placeholder" // same for all colours
     "ace" // same for all colours
-    "one" // same for all colours
     "two" // same for all colours
     "three" // same for all colours
     "four" // same for all colours
