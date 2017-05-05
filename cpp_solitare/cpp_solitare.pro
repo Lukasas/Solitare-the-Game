@@ -26,11 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     drawable.cpp \
-    card.cpp
+    card.cpp \
+    game_board.cpp
 
 HEADERS  += mainwindow.h \
     drawable.h \
-    card.h
+    card.h \
+    game_board.h \
+    cardlist.h
 
 FORMS    +=
 

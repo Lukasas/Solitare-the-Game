@@ -83,6 +83,18 @@ bool Card::CanBePlaced(const Card & OnThisCard) const
         return true;
     return false;
 }
+
+bool Card::IsHidden() const
+{
+    return hidden;
+}
+
+void Card::SetHidden(bool h)
+{
+    hidden = h;
+}
+
+
 /*
 void Card::LoadQPixmap(QString path)
 {

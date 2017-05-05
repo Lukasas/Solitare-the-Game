@@ -18,7 +18,7 @@ void drawable::LoadQPixmap(QString path)
 
 void drawable::SetQPixmap(QPixmap *pixMap)
 {
-    image = new QPixmap(pixMap);
+    //image = new QPixmap(pixMap);
 
 }
 
@@ -33,7 +33,7 @@ drawable::~drawable()
 void drawable::Draw()
 {
     // Will it work ? Should be
-    palette.setBrush(QPalette::Background, image);
+    //palette.setBrush(QPalette::Background, image);
 }
 
 void drawable::Highlight(bool enable)
