@@ -3,7 +3,7 @@
 void carditem::dropEvent(QGraphicsSceneDragDropEvent * event)
 {
 
-    QString name = event->mimeData()->text();
+    std::string name = event->mimeData()->text().toStdString();
     SceneBoard *b = (SceneBoard*)Scene;
     b->MoveCard(name, this);
 }
@@ -42,7 +42,7 @@ void carditem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         QDrag *drag = new QDrag((QObject*)event->widget());
         QMimeData *mime = new QMimeData;
         drag->setMimeData(mime);
-        mime->setText(GetName());
+        mime->setText(GetName().c_str());
         mime->setImageData(pixmap().toImage());
         drag->setPixmap(pixmap().scaled(pixmap().size()));
         drag->exec();

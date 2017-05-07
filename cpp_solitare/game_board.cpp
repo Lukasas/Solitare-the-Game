@@ -184,7 +184,7 @@ CardPos cGameBoard::GetCardLocation(Card *c) const
         for (int pos = 0; pos < CDlist[packID].size(); pos++)
         {
             Card * find = (Card*)CDlist[packID][pos];
-            if (strcmp(c->GetName(), find->GetName()) == 0)
+            if (c->GetName().compare(find->GetName()) == 0)
                 return CardPos(pos, packID);
         }
     }

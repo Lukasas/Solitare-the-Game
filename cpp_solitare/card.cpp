@@ -1,5 +1,7 @@
 #include "card.h"
 
+#include <string>
+#include <math.h>
 Card::Card(const Card &otherone)
 {
     value = otherone.value;
@@ -18,7 +20,7 @@ void Card::SetCardColour(CardColour colour)
     this->colour = colour;
 }
 
-Card::Card(Cards CardId, CardColour colour, bool hidden, char * name) : value(CardId), colour(colour)
+Card::Card(Cards CardId, CardColour colour, bool hidden, std::string name) : value(CardId), colour(colour), hidden(hidden)
 {
     this->name = name;
     /*if (CardId >= 0 && CardId <= 13 )
@@ -29,15 +31,15 @@ Card::Card(int ID)
 {
     value = static_cast<Cards>(((ID-1) % 13)+1);
     colour = static_cast<CardColour>(static_cast<int>(floor((ID - 1) / 13.0f)));
-    name = itoa(GetID(), new char[10], 10);
+    name = std::to_string(GetID());
 }
 
-void Card::SetName(char * name)
+void Card::SetName(std::string name)
 {
     this->name = name;
 }
 
-char * Card::GetName() const
+std::string Card::GetName() const
 {
     return name;
 }

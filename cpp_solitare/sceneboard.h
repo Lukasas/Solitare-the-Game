@@ -66,10 +66,10 @@ public:
     void StartGame();
     void LoadGame(QString GameName);
     void PickNewCard();
-    carditem * FindCardByName(QString name);
-    void MoveCard(QString Which, carditem * Where);
-    void MoveCard(QString Which, PlaceForKing * Where);
-    void MoveCard(QString Which, FinalPlace * Where);
+    carditem * FindCardByName(std::string name);
+    void MoveCard(std::string  Which, carditem * Where);
+    void MoveCard(std::string  Which, PlaceForKing * Where);
+    void MoveCard(std::string  Which, FinalPlace * Where);
     // Create one for slots !
     //void MoveCard(carditem * Which, carditem * Where);
 

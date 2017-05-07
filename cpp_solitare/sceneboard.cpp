@@ -88,7 +88,7 @@ void SceneBoard::PickNewCard()
     }
 }
 
-carditem *SceneBoard::FindCardByName(QString name)
+carditem *SceneBoard::FindCardByName(std::string name)
 {
     QList<QGraphicsItem*> all = items();
     for (int i = 0; i < all.count(); i++)
@@ -102,14 +102,14 @@ carditem *SceneBoard::FindCardByName(QString name)
     return 0;
 }
 
-void SceneBoard::MoveCard(QString Which, carditem *Where)
+void SceneBoard::MoveCard(std::string  Which, carditem *Where)
 {
     carditem * movingCard = FindCardByName(Which);
 
     if (movingCard->Equal(*Where))
         return;
 
-    if (Where->Equal(*packCard))
+    if (packCard != 0 && Where->Equal(*packCard))
         return;
 
     CardPos wherePosition = game->GetCardLocation(Where);
@@ -138,7 +138,7 @@ void SceneBoard::MoveCard(QString Which, carditem *Where)
         {
             if (movingCard->iGetCardColour() == Where->iGetCardColour())
             {
-                if (Where->Equal(*packCard))
+                if (packCard != 0 && Where->Equal(*packCard))
                     return;
 
                 if (game->MoveCardToSlotFromList(movingPosition, Where->iGetCardColour()))
@@ -175,6 +175,8 @@ void SceneBoard::MoveCard(QString Which, carditem *Where)
                         movingCard->setPos(Where->pos());
                         movingCard->setY(Where->y());
                         movingCard->setZValue(Where->zValue() + 1 );
+                        packCard = 0;
+                        game->RemoveCardFromPack();
                     }
                 }
             }
@@ -182,17 +184,20 @@ void SceneBoard::MoveCard(QString Which, carditem *Where)
         }
         else // Have to be from Slot to List
         {
-            if (game->MoveCardToListFromSlot(Where->iGetCardColour(), wherePosition.ListID))
+            if (wherePosition.ListID != -1) // Must be list otherwise ignore
             {
-                movingCard->setPos(Where->pos());
-                movingCard->setY(Where->y());
-                movingCard->setZValue(Where->zValue() + 1 );
+                if (game->MoveCardToListFromSlot(Where->iGetCardColour(), wherePosition.ListID))
+                {
+                    movingCard->setPos(Where->pos());
+                    movingCard->setY(Where->y());
+                    movingCard->setZValue(Where->zValue() + 1 );
+                }
             }
         }
     }
 }
 
-void SceneBoard::MoveCard(QString Which, PlaceForKing *Where)
+void SceneBoard::MoveCard(std::string Which, PlaceForKing *Where)
 {
     carditem * movingCard = FindCardByName(Which);
     if (!movingCard->IsKing())
@@ -219,7 +224,7 @@ void SceneBoard::MoveCard(QString Which, PlaceForKing *Where)
     }
     else
     {
-        if (movingCard->Equal(*packCard)) // From pack
+        if (packCard != 0 && movingCard->Equal(*packCard)) // From pack
         {
             if (game->MoveCardToListFromPack(Where->GetID()))
             {
@@ -242,10 +247,10 @@ void SceneBoard::MoveCard(QString Which, PlaceForKing *Where)
     }
 }
 
-void SceneBoard::MoveCard(QString Which, FinalPlace *Where)
+void SceneBoard::MoveCard(std::string  Which, FinalPlace *Where)
 {
     carditem * movingCard = FindCardByName(Which);
-    if (!movingCard->IsAce() && movingCard->iGetCardColour() != Where->GetID())
+    if (!movingCard->IsAce() || movingCard->iGetCardColour() != Where->GetID())
         return;
     CardPos movingPosition = game->GetCardLocation(movingCard);
     if (movingPosition.ListID != -1) // Is in list
@@ -259,7 +264,7 @@ void SceneBoard::MoveCard(QString Which, FinalPlace *Where)
     }
     else
     {
-        if (movingCard->Equal(*packCard)) // From pack
+        if (packCard != 0 && movingCard->Equal(*packCard)) // From pack
         {
             if (game->MoveCardToSlotFromPack(Where->GetID()))
             {
@@ -389,7 +394,7 @@ void CardPackClick::mousePressEvent(QGraphicsSceneMouseEvent*)
 
 void PlaceForKing::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
-    QString name = event->mimeData()->text();
+    std::string name = event->mimeData()->text().toStdString();
     SceneBoard *b = (SceneBoard*)board;
     b->MoveCard(name, this);
 }
@@ -403,7 +408,7 @@ PlaceForKing::PlaceForKing(SceneBoard *board, int ID)
 
 void FinalPlace::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
-    QString name = event->mimeData()->text();
+    std::string name = event->mimeData()->text().toStdString();
     SceneBoard *b = (SceneBoard*)board;
     b->MoveCard(name, this);
 }

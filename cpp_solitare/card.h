@@ -2,7 +2,7 @@
 #define CARD_H
 
 
-#include <stdlib.h>
+#include <string>
 #include <math.h>
 
 enum Cards
@@ -30,9 +30,9 @@ private:
     Cards value;
     CardColour colour;
     bool hidden;
-    char * name;
+    std::string name;
 public:
-    explicit Card(Cards CardId, CardColour colour, bool hidden, char * name);
+    explicit Card(Cards CardId, CardColour colour, bool hidden, std::string name);
     explicit Card(int ID);
     explicit Card(const Card & otherone);
 
@@ -42,7 +42,7 @@ public:
      * @param name
      * Name of card
      */
-    void SetName(char * name);
+    void SetName(std::string name);
 
     void SetCardValue(Cards value);
 
@@ -54,7 +54,7 @@ public:
      * @return
      * Property name
      */
-    char * GetName() const;
+    std::string GetName() const;
 
     /**
      * @brief iGetCardValue
