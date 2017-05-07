@@ -7,18 +7,14 @@
 #include <iostream>
 #include <csignal>
 #include <string>
+#include <queue>
+#include <map>
 
 #include <ncurses.h>
-#include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define KEY_SPACE 32
-#define Y_GAP 3
-#define X_GAP 3
-
-typedef struct arrow_movement {
-    int pos[2];
-    int card_edge_size;
-} ARROW;
 
 void keyboard_interrupt(int signum)
 {
@@ -38,44 +34,168 @@ void resizeterm(int signum)
     return;
 }
 
-void card_back(WINDOW *card, int edge_size)
+typedef struct card_details{
+    std::string value;
+    bool turned;
+} CARD;
+
+typedef std::queue<CARD> CSTACK;
+
+typedef struct placeholder_details{
+    WINDOW *CARD_WINDOW;
+    int window_height;
+    int window_width;
+    bool blank;
+    bool secret;
+} PLACEHOLDER;
+
+typedef std::queue<PLACEHOLDER> CARD_SPOT;
+typedef std::map<int, CARD_SPOT> PLAYGROUND;
+
+class CLI{
+    public:
+        // Variables
+        int card_edge_size;
+        int y_gap, x_gap;
+
+        // Methods
+        CLI(); // Constructor
+        ~CLI(); // Destructor
+        void put_card_values(PLACEHOLDER window);
+        void arrow_control();
+
+    private:
+        // Variables
+        PLAYGROUND game_area;
+        int arrow_pos[2];
+
+        // Methods
+        void init_playground();
+        WINDOW * create_card_window(int start_y, int start_x);
+        void card_back(PLACEHOLDER window);
+        void draw_arrow(bool erase);
+};
+
+/**
+ * @brief Constructor for CLI class
+**/
+CLI::CLI(void)
 {
-    wattron(card, COLOR_PAIR(1));
-    for(int i = 1; i < edge_size; i++){
-        for(int j = 1; j < edge_size; j++){
-            mvwaddch(card, i, j, '?');
+    std::setlocale(LC_ALL, "");
+    srand(time(0));
+
+    initscr();
+    noecho();
+    cbreak();
+    curs_set(0);
+    keypad(stdscr, TRUE);
+
+    start_color();
+    init_pair(1, COLOR_WHITE, COLOR_GREEN); // Font: white, BG: green
+    init_pair(2, COLOR_RED, COLOR_WHITE);   // Font: red, BG: white
+    init_pair(3, COLOR_BLACK, COLOR_WHITE); // Font: black BG: white
+    wbkgd(stdscr, COLOR_PAIR(1));
+    wrefresh(stdscr);
+
+    y_gap = 3;
+    x_gap = 3;
+    int max_y, max_x;
+    getmaxyx(stdscr, max_y, max_x);
+    (void) max_y;
+    if(max_x < 66){
+        throw "Window is too small.";
+    }
+
+    card_edge_size = (max_x > 94 ? 10 : 6 + (2 * ((max_x - 66) / 14)));
+    arrow_pos[0] = 1;
+    arrow_pos[1] = 0;
+
+    init_playground();
+}
+
+/**
+ * @brief Destructor for CLI class
+**/
+CLI::~CLI(void)
+{
+    // Destroy all sub-windows
+    CARD_SPOT tmp;
+    for (int i = 0; i < 7; i++){
+        tmp = game_area[1 - i];
+
+        while( ! tmp.empty()){
+            delwin(tmp.back().CARD_WINDOW);
+            tmp.pop();
+        }
+
+        if(i != 2){
+            tmp = game_area[2 + i];
+
+            while( ! tmp.empty()){
+                delwin(tmp.back().CARD_WINDOW);
+                tmp.pop();
+            }
         }
     }
-    wrefresh(card);
+
+    // End main window
+    endwin();
 }
 
-void put_card_values(WINDOW *card, int edge_size)
+void CLI::card_back(PLACEHOLDER window)
 {
-    std::string card_val = "♣ 10";
-    wattron(card, COLOR_PAIR(2));
-    mvwprintw(card, 1, 1, "%s", card_val.c_str());
-    mvwprintw(card, edge_size - 2, edge_size - card_val.size() + 1, "%s", card_val.c_str());
-    wrefresh(card);
+    wattron(window.CARD_WINDOW, COLOR_PAIR(3));
+    for(int i = 1; i < window.window_width - 1; i++){
+        for(int j = 1; j < window.window_height - 1; j++){
+            mvwaddch(window.CARD_WINDOW, i, j, '?');
+        }
+    }
+    wrefresh(window.CARD_WINDOW);
 }
 
-void create_card_window(int start_y, int start_x, int card_edge_size)
+void CLI::put_card_values(PLACEHOLDER window)
+{
+    wbkgd(window.CARD_WINDOW, COLOR_PAIR(1));
+    wattron(window.CARD_WINDOW, COLOR_PAIR(1));
+    box(window.CARD_WINDOW, 0, 0);
+    wrefresh(window.CARD_WINDOW);
+
+    if(window.blank){
+        return;
+    }
+    else if(window.secret){
+        card_back(window);
+        return;
+    }
+
+    wbkgd(window.CARD_WINDOW, COLOR_PAIR(3));
+    wattron(window.CARD_WINDOW, COLOR_PAIR(1));
+    box(window.CARD_WINDOW, 0, 0);
+
+    int ran_num = rand() % 9 + 2;
+
+    std::string card_val = "♣ " + std::to_string(ran_num);
+    wattron(window.CARD_WINDOW, COLOR_PAIR(2));
+    mvwprintw(window.CARD_WINDOW, 1, 1, "%s", card_val.c_str());
+    mvwprintw(window.CARD_WINDOW, window.window_width - 2, window.window_width - card_val.size() + 1, "%s", card_val.c_str());
+    wrefresh(window.CARD_WINDOW);
+}
+
+WINDOW * CLI::create_card_window(int start_y, int start_x)
 {
     WINDOW *card = newwin(card_edge_size, card_edge_size, start_y, start_x);
-    wborder(card, '|', '|', '-', '-', '+', '+', '+', '+');
-    wbkgd(card, COLOR_PAIR(1));
-
-    put_card_values(card, card_edge_size);
     wrefresh(card);
+    return card;
 }
 
-void draw_arrow(ARROW *arr_cfg, bool erase)
+void CLI::draw_arrow(bool erase)
 {
     // Define letters for arrow
     char left_side = (erase ? ' ' : '/');
     char right_side = (erase ? ' ' : '\\');
 
-    int start_y = (Y_GAP + arr_cfg -> card_edge_size) * arr_cfg -> pos[0];
-    int start_x = (X_GAP + (arr_cfg -> card_edge_size / 2 - 1)) + (X_GAP + arr_cfg -> card_edge_size) * arr_cfg -> pos[1];
+    int start_y = (y_gap + card_edge_size) * arrow_pos[0];
+    int start_x = (x_gap + (card_edge_size / 2 - 1)) + (x_gap + card_edge_size) * arrow_pos[1];
 
     mvwaddch(stdscr, start_y, start_x, left_side);
     mvwaddch(stdscr, start_y, start_x + 1, right_side);
@@ -84,107 +204,98 @@ void draw_arrow(ARROW *arr_cfg, bool erase)
     wrefresh(stdscr);
 }
 
-void arrow_control(ARROW *arr_cfg)
+void CLI::arrow_control()
 {
+    bool picked_card = FALSE;
+
+    draw_arrow(FALSE);
     int kb_press;
-    draw_arrow(arr_cfg, FALSE);
     while((kb_press = getch()) != KEY_F(10)){
         switch(kb_press){
             case KEY_UP:
-                if(arr_cfg -> pos[0] == 1) break;
-                if(arr_cfg -> pos[0] == 2 && arr_cfg -> pos[1] == 2)break;
-                draw_arrow(arr_cfg, TRUE);
-                arr_cfg -> pos[0]--;
-                draw_arrow(arr_cfg, FALSE);
+                if(arrow_pos[0] == 1) break;
+                if(arrow_pos[0] == 2 && arrow_pos[1] == 2)break;
+                draw_arrow(TRUE);
+                arrow_pos[0]--;
+                draw_arrow(FALSE);
                 break;
             case KEY_DOWN:
-                if(arr_cfg -> pos[0] == 2) break;
-                draw_arrow(arr_cfg, TRUE);
-                arr_cfg -> pos[0]++;
-                draw_arrow(arr_cfg, FALSE);
+                if(arrow_pos[0] == 2) break;
+                draw_arrow(TRUE);
+                arrow_pos[0]++;
+                draw_arrow(FALSE);
                 break;
             case KEY_LEFT:
-                if(arr_cfg -> pos[1] == 0) break;
-                draw_arrow(arr_cfg, TRUE);
-                if(arr_cfg -> pos[0] == 1 && arr_cfg -> pos[1] == 3)
-                    arr_cfg -> pos[1] = 1;
+                if(arrow_pos[1] == 0) break;
+                draw_arrow(TRUE);
+                if(arrow_pos[0] == 1 && arrow_pos[1] == 3)
+                    arrow_pos[1] = 1;
                 else
-                    arr_cfg -> pos[1]--;
-                draw_arrow(arr_cfg, FALSE);
+                    arrow_pos[1]--;
+                draw_arrow(FALSE);
                 break;
             case KEY_RIGHT:
-                if(arr_cfg -> pos[1] == 6) break;
-                draw_arrow(arr_cfg, TRUE);
-                if(arr_cfg -> pos[0] == 1 && arr_cfg -> pos[1] == 1)
-                    arr_cfg -> pos[1] = 3;
+                if(arrow_pos[1] == 6) break;
+                draw_arrow(TRUE);
+                if(arrow_pos[0] == 1 && arrow_pos[1] == 1)
+                    arrow_pos[1] = 3;
                 else
-                    arr_cfg -> pos[1]++;
-                draw_arrow(arr_cfg, FALSE);
+                    arrow_pos[1]++;
+                draw_arrow(FALSE);
                 break;
             case KEY_SPACE:
+                picked_card = (picked_card ? FALSE : TRUE);
                 break;
         }
         wrefresh(stdscr);
     }
 }
 
-void init_playground(ARROW *arr_pos)
+void CLI::init_playground()
 {
-    int size_y, size_x;
-    int x_shift = X_GAP;
-
-    getmaxyx(stdscr, size_y, size_x);
-    (void)size_y;
-
-    if(size_x < 66){
-        throw "Window is too small.";
-    }
-
-    int card_edge_size = (size_x > 94 ? 10 : 6 + (2 * ((size_x - 66) / 14)));
-    arr_pos -> pos[0] = 1;
-    arr_pos -> pos[1] = 0;
-    arr_pos -> card_edge_size = card_edge_size;
+    int x_shift = x_gap;
 
     for(int i = 0; i < 7; i++){
-        wmove(stdscr, 0, 0);
-        // Create upper row of cards
-        if(i != 2){
-            create_card_window(Y_GAP, x_shift, card_edge_size);
-        }
-        // Create lower row of cards
-        create_card_window(Y_GAP * 2 + card_edge_size, x_shift, card_edge_size);
+        PLACEHOLDER tmp;
+        tmp.window_height = card_edge_size;
+        tmp.window_width = card_edge_size;
+        tmp.CARD_WINDOW = create_card_window(y_gap * 2 + card_edge_size, x_shift);
+        tmp.blank = FALSE;
+        tmp.secret = FALSE;
+        game_area[1 - i].push(tmp);
 
+        if(i != 2){
+            PLACEHOLDER tmp;
+            tmp.window_height = card_edge_size;
+            tmp.window_width = card_edge_size;
+            tmp.CARD_WINDOW = create_card_window(y_gap, x_shift);
+            tmp.blank = (i > 2);
+            tmp.secret = (i == 0);
+            game_area[2 + i].push(tmp);
+        }
         // Compute gap on x's axis for new card
         x_shift = x_shift + card_edge_size + 3;
     }
-    arrow_control(arr_pos);
+
+    for(int i = 0; i < 7; i++){
+        PLACEHOLDER tmp = game_area[1 - i].back();
+        put_card_values(tmp);
+        if(i != 2){
+            tmp = game_area[2 + i].back();
+            put_card_values(tmp);
+        }
+    }
 }
 
 int main()
 {
-    std::setlocale(LC_ALL, "");
-    signal(SIGWINCH, resizeterm);
+    // Signal handlers
     signal(SIGINT, keyboard_interrupt);
+    signal(SIGWINCH, resizeterm);
 
-    initscr();
-    noecho();
-    cbreak();
-    curs_set(0);
-    keypad(stdscr, TRUE);
-
-    ARROW arrow_cfg;
-
-    // Set window color
-    start_color();
-    init_pair(1, COLOR_WHITE, COLOR_GREEN);
-    init_pair(2, COLOR_BLACK, COLOR_GREEN);
-    init_pair(3, COLOR_RED, COLOR_GREEN);
-    wbkgd(stdscr, COLOR_PAIR(1));
-
-    // init_playground();
-    wrefresh(stdscr);
     try{
-        init_playground(&arrow_cfg);
+        CLI cli_gui;
+        cli_gui.arrow_control();
     }
     catch (const char *err_msg){
         endwin();
@@ -192,6 +303,5 @@ int main()
         exit(4);
     }
 
-    endwin();
     return 0;
 }
