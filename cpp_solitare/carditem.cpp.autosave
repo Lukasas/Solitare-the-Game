@@ -2,7 +2,7 @@
 #include "sceneboard.h"
 void carditem::dropEvent(QGraphicsSceneDragDropEvent * event)
 {
-
+    
     QString name = event->mimeData()->text();
     SceneBoard *b = (SceneBoard*)Scene;
     b->MoveCard(name, this);

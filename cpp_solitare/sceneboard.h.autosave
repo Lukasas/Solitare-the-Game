@@ -71,6 +71,7 @@ public:
     carditem * FindCardByName(QString name);
     void MoveCard(QString Which, carditem * Where);
     void MoveCard(QString Which, PlaceForKing * Where);
+    void MoveCard(QString Which, FinalPlace * Where);
     // Create one for slots !
     //void MoveCard(carditem * Which, carditem * Where);
 

@@ -6,9 +6,21 @@ Card::Card(const Card &otherone)
 {
     value = otherone.value;
     colour = otherone.colour;
+    hidden = otherone.hidden;
+    name = otherone.name;
 }
 
-Card::Card(Cards CardId, CardColour colour) : value(CardId), colour(colour)
+void Card::SetCardValue(Cards value)
+{
+    this->value = value;
+}
+
+void Card::SetCardColour(CardColour colour)
+{
+    this->colour = colour;
+}
+
+Card::Card(Cards CardId, CardColour colour, bool hidden, QString name) : value(CardId), colour(colour), name(name)
 {
     /*if (CardId >= 0 && CardId <= 13 )
         LoadQPixmap(BaseCardPaths[CardId] + charBaseCardColor[colour] + ".png");*/
@@ -18,6 +30,17 @@ Card::Card(int ID)
 {
     value = static_cast<Cards>(((ID-1) % 13)+1);
     colour = static_cast<CardColour>(static_cast<int>(floor((ID - 1) / 13.0f)));
+    name = itoa(GetID(), new char[10], 10);
+}
+
+void Card::SetName(QString name)
+{
+    this->name = name;
+}
+
+QString Card::GetName() const
+{
+    return name;
 }
 
 int Card::GetID()
@@ -47,6 +70,11 @@ int Card::Compare(const Card & other) const
     return other.iGetCardValue() - value;
 }
 
+bool Card::Equal(const Card & other) const
+{
+    return (colour == other.colour && Compare(other) == 0);
+}
+
 bool Card::CompareColours(const Card & other) const
 {
     if ((   colour < 2 && other.iGetCardColour() < 2) ||
@@ -59,7 +87,11 @@ bool Card::CompareColours(const Card & other) const
 bool Card::CanBePlaced(const Card & OnThisCard) const
 {
     if (Compare(OnThisCard) == 1 && !CompareColours(OnThisCard))
+    {
+        qDebug("Can be placed");
         return true;
+    }
+    qDebug("Cant be placed");
     return false;
 }
 
@@ -73,6 +105,15 @@ void Card::SetHidden(bool h)
     hidden = h;
 }
 
+bool Card::IsKing() const
+{
+    return value == 13;
+}
+
+bool Card::IsAce() const
+{
+    return value == 1;
+}
 
 /*
 void Card::LoadQPixmap(QString path)

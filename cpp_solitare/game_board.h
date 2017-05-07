@@ -8,6 +8,18 @@
 #include <random>
 #include <time.h>
 
+struct CardPos
+{
+    CardPos(int top, int list)
+    {
+        TopPos = top;
+        ListID = list;
+    }
+
+    int TopPos;
+    int ListID;
+};
+
 /**
  * @brief The cGameBoard class
  * Usage:
@@ -49,6 +61,8 @@ private:
      */
     void gameEndedCheck();
 
+
+public:
     /**
      * @brief GetCardFromList
      * Gets a card from CDlist
@@ -57,8 +71,16 @@ private:
      * @return
      */
     Card * GetCardFromList(int CDlistID, int cardPos);
+    /**
+     * @brief GetCardLocation
+     * Returns a structure filled with location of Card
+     * @param c
+     * Pointer to Card
+     * @return
+     * Returns zeros in structure if not found
+     */
+    CardPos GetCardLocation(Card * c) const;
 
-public:
     /**
      * @brief cGameBoard
      * This constructor must be always called
@@ -76,8 +98,10 @@ public:
     /**
      * @brief PickPackCard
      * Selects the top card of pack
+     * @return
+     * Returns true if card was picked successfully
      */
-    void PickPackCard();
+    bool PickPackCard();
 
     /**
      * @brief GenerateGame
@@ -119,8 +143,9 @@ public:
      * @return
      * Return true if its possible
      */
-    bool CanBeMovedFromList(int CDlist, int cardPos);
+    bool CanBeMovedFromList(int CDlistID, int cardPos);
 
+    bool CanBeMovedToList(int CDlistID, Card * c);
 
     /**
      * @brief ShowCard
@@ -130,7 +155,7 @@ public:
      * @return
      * Return true if show action was successfull
      */
-    bool ShowCard(int CDlist, int cardPos);
+    bool ShowCard(int CDlistID, int cardPos);
 
     /**
      * @brief CanBeShown
@@ -144,9 +169,9 @@ public:
 
     /**
      * @brief RemoveCardFromPack
-     * @return
+     * Removes card from pack - Card was picked and placed somewhere else
      */
-    Card RemoveCardFromPack();
+    void RemoveCardFromPack();
 
     /**
      * @brief SetEndGameNotify
@@ -185,7 +210,7 @@ public:
     bool MoveCardToListFromPack(int CDlistID);
 
     /**
-     * @brief MoveCardToSlotFromList
+     * @brief MoCaToSlFrLi
      * Moves a card from list to Slot
      * @param CDlistID
      * ID of list
@@ -196,10 +221,22 @@ public:
      * @return
      * Return true if the move was successfull
      */
-    bool MoveCardToSlotFromList(int CDlistID, int cardID, int SlotID);
+    bool MoCaToSlFrLi(int CDlistID, int cardID, int SlotID);
 
     /**
-     * @brief MoveCardToListFromList
+     * @brief MoveCardToSlotFromList
+     * Moves a card from list to Slot (Wrapper)
+     * @param card
+     * Card location
+     * @param SlotID
+     * Slot Position (0 - 3)
+     * @return
+     * Return true if the move was successfull
+     */
+    bool MoveCardToSlotFromList(CardPos card, int SlotID);
+
+    /**
+     * @brief MoCaToLiFrLi
      * Moves a card through the battleground
      * @param CDlistID
      * ID of list the card is from
@@ -207,12 +244,32 @@ public:
      * ID of card from top
      * @param ToCDlistID
      * ID of list to put the card
-     * @param TocardID
-     * ID of card that is moving (from top)
      * @return
      * Return true if the move was successfull
      */
-    bool MoveCardToListFromList(int CDlistID, int cardID, int ToCDlistID, int TocardID);
+    bool MoCaToLiFrLi(int CDlistID, int cardID, int ToCDlistID);
+
+    /**
+     * @brief MoveCardToListFromList
+     * Simplyfied moving card (Wrapper)
+     * @param card
+     * Pointer to card which is supposed to move
+     * @param toList
+     * ID of list
+     * @return
+     * Return true if the move was successfull
+     */
+    bool MoveCardToListFromList(CardPos card, int toList);
+
+    /**
+     * @brief FindChildsOfCard
+     * Returns every child of this card in list
+     * @param c
+     * Position of parent card
+     * @return
+     * List of cards
+     */
+    std::vector<Card*> FindChildrenOfCard(CardPos c);
 
     /**
      * @brief GetTopCardFromSlot
@@ -232,6 +289,8 @@ public:
      * @return
      */
     std::vector<Card*> GetCardList(int CDlistID);
+
+    void ShowCard(CardPos c, bool show);
 
     ~cGameBoard();
 

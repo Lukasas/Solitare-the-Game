@@ -28,10 +28,32 @@ private:
     Cards value;
     CardColour colour;
     bool hidden;
+    QString name;
 public:
-    explicit Card(Cards CardId, CardColour colour);
+    explicit Card(Cards CardId, CardColour colour, bool hidden, QString name);
     explicit Card(int ID);
     explicit Card(const Card & otherone);
+
+    /**
+     * @brief SetName
+     * Sets an helping name
+     * @param name
+     * Name of card
+     */
+    void SetName(QString name);
+
+    void SetCardValue(Cards value);
+
+    void SetCardColour(CardColour colour);
+
+    /**
+     * @brief GetName
+     * Returns a helping name of card
+     * @return
+     * Property name
+     */
+    QString GetName() const;
+
     /**
      * @brief iGetCardValue
      *      Returns card value (1>K)
@@ -62,6 +84,16 @@ public:
     int Compare(const Card& other) const;
 
     /**
+     * @brief Card::Equal
+     * Compare if the "other" card is exactly same as the asking one
+     * @param other
+     * Just a Card
+     * @return
+     * True if colour and value are same
+     */
+    bool Equal(const Card & other) const;
+
+    /**
      * @brief CompareColours
      *      Comares two cards' colour
      * @param other
@@ -85,6 +117,10 @@ public:
     void SetHidden(bool h);
 
     int GetID();
+
+    bool IsKing() const;
+
+    bool IsAce() const;
 };
 
 #endif // CARD_H
