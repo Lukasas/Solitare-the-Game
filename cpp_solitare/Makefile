@@ -2,18 +2,19 @@
 CPPC = g++
 CPPFLAGS = -std=c++11 -Wall -Wextra -pedantic
 LIBS = -lncursesw -lQtCore
+INC = -I /usr/include/qt5/QtCore/
 
 cli_gui: cli_gui.o card.o game_board.o
-	$(CPPC) $(CPPFLAGS) $^ -o $@ $(LIBS) -I /usr/include/qt5/QtCore/
+	$(CPPC) $(CPPFLAGS) $^ -o $@ $(LIBS)
 
 cli_gui.o: cli_gui.cpp cli_gui.h
-	$(CPPC) $(CPPFLAGS) -c $< -o $@ $(LIBS) -I /usr/include/qt5/QtCore/
+	$(CPPC) $(CPPFLAGS) -c $^ -o $@ $(LIBS)
 
 card.o: card.cpp card.h
-	$(CPPC) $(CPPFLAGS) -c $< -o $@ $(LIBS) -I /usr/include/qt5/QtCore/
+	$(CPPC) $(CPPFLAGS) -c $< -o $@ $(LIBS) $(INC)
 
 game_board.o: game_board.cpp game_board.h
-	$(CPPC) $(CPPFLAGS) -c $< -o $@ $(LIBS) -I /usr/include/qt5/QtCore/
+	$(CPPC) $(CPPFLAGS) -c $< -o $@ $(LIBS) $(INC)
 
 clean:
 	rm -rf *.o || true 2>/dev/null
