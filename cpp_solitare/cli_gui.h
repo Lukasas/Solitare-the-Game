@@ -1,6 +1,12 @@
 #ifndef _CLI_GUI_H_
 #define _CLI_GUI_H_
 
+#include <string>
+#include <queue>
+#include <map>
+
+#include <ncurses.h>
+
 #include "game_board.h"
 
 #define KEY_SPACE 32
@@ -18,9 +24,9 @@ typedef struct placeholder_details{
     int window_width;
     bool blank;
     bool secret;
-} PLACEHOLDER;
+} CARD_PLACEHOLDER;
 
-typedef std::queue<PLACEHOLDER> CARD_SPOT;
+typedef std::queue<CARD_PLACEHOLDER> CARD_SPOT;
 typedef std::map<int, CARD_SPOT> PLAYGROUND;
 
 class CLI{
@@ -32,7 +38,7 @@ class CLI{
         // Methods
         CLI(); // Constructor
         ~CLI(); // Destructor
-        void put_card_values(PLACEHOLDER window);
+        void put_card_values(CARD_PLACEHOLDER window);
         void arrow_control();
 
     private:
@@ -43,7 +49,7 @@ class CLI{
         // Methods
         void init_playground();
         WINDOW * create_card_window(int start_y, int start_x);
-        void card_back(PLACEHOLDER window);
+        void card_back(CARD_PLACEHOLDER window);
         void draw_arrow(bool erase);
 };
 

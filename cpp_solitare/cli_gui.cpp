@@ -101,7 +101,7 @@ CLI::~CLI(void)
     endwin();
 }
 
-void CLI::card_back(PLACEHOLDER window)
+void CLI::card_back(CARD_PLACEHOLDER window)
 {
     wattron(window.CARD_WINDOW, COLOR_PAIR(3));
     for(int i = 1; i < window.window_width - 1; i++){
@@ -112,7 +112,7 @@ void CLI::card_back(PLACEHOLDER window)
     wrefresh(window.CARD_WINDOW);
 }
 
-void CLI::put_card_values(PLACEHOLDER window)
+void CLI::put_card_values(CARD_PLACEHOLDER window)
 {
     wbkgd(window.CARD_WINDOW, COLOR_PAIR(1));
     wattron(window.CARD_WINDOW, COLOR_PAIR(1));
@@ -215,7 +215,7 @@ void CLI::init_playground()
     int x_shift = x_gap;
 
     for(int i = 0; i < 7; i++){
-        PLACEHOLDER tmp;
+        CARD_PLACEHOLDER tmp;
         tmp.window_height = card_edge_size;
         tmp.window_width = card_edge_size;
         tmp.CARD_WINDOW = create_card_window(y_gap * 2 + card_edge_size, x_shift);
@@ -224,7 +224,7 @@ void CLI::init_playground()
         game_area[1 - i].push(tmp);
 
         if(i != 2){
-            PLACEHOLDER tmp;
+            CARD_PLACEHOLDER tmp;
             tmp.window_height = card_edge_size;
             tmp.window_width = card_edge_size;
             tmp.CARD_WINDOW = create_card_window(y_gap, x_shift);
@@ -237,7 +237,7 @@ void CLI::init_playground()
     }
 
     for(int i = 0; i < 7; i++){
-        PLACEHOLDER tmp = game_area[1 - i].back();
+        CARD_PLACEHOLDER tmp = game_area[1 - i].back();
         put_card_values(tmp);
         if(i != 2){
             tmp = game_area[2 + i].back();
