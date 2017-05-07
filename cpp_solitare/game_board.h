@@ -118,16 +118,6 @@ public:
     void LoadGame(int slotID);
 
     /**
-     * @brief RemoveCards
-     * Removes cards from List, this is used for like moving cards
-     * @param CDlist
-     * ID of list
-     * @param count
-     * How many cards needs to be removed
-     */
-    void RemoveCards(int CDlistID, int count);
-
-    /**
      * @brief AddCard
      * Adds a specific card to list, mostly used for creating or loading a game
      * @param CDlist

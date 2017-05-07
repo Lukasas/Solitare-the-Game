@@ -35,7 +35,7 @@ void cGameBoard::RandomizeCards()
     {
         WholePackOfCards[i] = i+1;
     }
-    shuffle(WholePackOfCards.begin(), WholePackOfCards.end(), std::default_random_engine(time(0)));
+    shuffle(WholePackOfCards.begin(), WholePackOfCards.end(), std::default_random_engine((unsigned int)time(0)));
 
 }
 
@@ -55,8 +55,6 @@ void cGameBoard::FillGame()
                 c->SetHidden(false);
         }        
     }
-
-    int test = WholePackOfCards[currentID-1];
 
     for (; currentID < 52; currentID++)
     {
@@ -94,13 +92,9 @@ void cGameBoard::GenerateNewGame()
 
 void cGameBoard::LoadGame(int slotID)
 {
-
+    slotID;
 }
 
-void cGameBoard::RemoveCards(int CDlistID, int count)
-{
-
-}
 
 void cGameBoard::AddCard(int CDlistID, Card *card)
 {

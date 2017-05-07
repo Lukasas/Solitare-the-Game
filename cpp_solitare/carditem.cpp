@@ -8,12 +8,11 @@ void carditem::dropEvent(QGraphicsSceneDragDropEvent * event)
     b->MoveCard(name, this);
 }
 
-void carditem::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
+void carditem::dragEnterEvent(QGraphicsSceneDragDropEvent *)
 {
-    qDebug("CARD ITEM ENTER");
 }
 
-void carditem::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
+void carditem::dragLeaveEvent(QGraphicsSceneDragDropEvent *)
 {
 
 }
@@ -24,12 +23,12 @@ void carditem::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
     setAcceptDrops(true);
 }
 
-void carditem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void carditem::mousePressEvent(QGraphicsSceneMouseEvent *)
 {
 
 }
 
-void carditem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void carditem::mouseReleaseEvent(QGraphicsSceneMouseEvent *)
 {
     SceneBoard * b = (SceneBoard*)Scene;
     b->ShowCard(this);
