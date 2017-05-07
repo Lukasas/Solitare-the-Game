@@ -3,4 +3,5 @@ build-cpp_solitare-Desktop_Qt_5_6_2_MSVC2013_64bit3-Ladění/
 
 build-cpp_solitare-Desktop_Qt_5_8_0_MSVC2013_64bit-Ladění/
 
+*.o
 cli_gui
