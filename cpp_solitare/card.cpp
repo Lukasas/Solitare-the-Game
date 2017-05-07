@@ -1,7 +1,5 @@
 #include "card.h"
 
-
-
 Card::Card(const Card &otherone)
 {
     value = otherone.value;
@@ -20,8 +18,9 @@ void Card::SetCardColour(CardColour colour)
     this->colour = colour;
 }
 
-Card::Card(Cards CardId, CardColour colour, bool hidden, QString name) : value(CardId), colour(colour), name(name)
+Card::Card(Cards CardId, CardColour colour, bool hidden, char * name) : value(CardId), colour(colour)
 {
+    this->name = name;
     /*if (CardId >= 0 && CardId <= 13 )
         LoadQPixmap(BaseCardPaths[CardId] + charBaseCardColor[colour] + ".png");*/
 }
@@ -33,12 +32,12 @@ Card::Card(int ID)
     name = itoa(GetID(), new char[10], 10);
 }
 
-void Card::SetName(QString name)
+void Card::SetName(char * name)
 {
     this->name = name;
 }
 
-QString Card::GetName() const
+char * Card::GetName() const
 {
     return name;
 }

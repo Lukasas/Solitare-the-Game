@@ -25,21 +25,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    drawable.cpp \
     card.cpp \
     game_board.cpp \
     carditem.cpp \
-    viewboard.cpp \
     sceneboard.cpp
 
 HEADERS  += mainwindow.h \
-    drawable.h \
     card.h \
     game_board.h \
-    cardlist.h \
-    coordinates.h \
     carditem.h \
-    viewboard.h \
     sceneboard.h
 
 FORMS    +=

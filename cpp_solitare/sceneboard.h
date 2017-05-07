@@ -3,7 +3,6 @@
 
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
-#include "viewboard.h"
 #include "card.h"
 #include "carditem.h"
 #include "game_board.h"
@@ -48,7 +47,6 @@ private:
 
     float xx, yy, ww, hh;
 
-    void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
     cGameBoard * game;
 
     // 53 - Back | 0 - placeholder

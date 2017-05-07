@@ -33,11 +33,6 @@ QString charBaseCardColor[4] =
     "_C"
 };
 
-void SceneBoard::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
-{
-    qDebug("DRAG ENTER SCENE");
-}
-
 QPixmap SceneBoard::GetCardImgById(int ID)
 {
     return *(cards[ID]);
@@ -104,6 +99,7 @@ carditem *SceneBoard::FindCardByName(QString name)
             return ((carditem*)all.at(i));
         }
     }
+    return 0;
 }
 
 void SceneBoard::MoveCard(QString Which, carditem *Where)
@@ -385,8 +381,9 @@ void SceneBoard::FirstDrawTheGame()
 
 
 
-void CardPackClick::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void CardPackClick::mousePressEvent(QGraphicsSceneMouseEvent*)
 {
+
     board->PickNewCard();
 }
 

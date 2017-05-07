@@ -1,7 +1,9 @@
 #ifndef CARD_H
 #define CARD_H
 
-#include <QString>
+
+#include <stdlib.h>
+#include <math.h>
 
 enum Cards
 {
@@ -28,9 +30,9 @@ private:
     Cards value;
     CardColour colour;
     bool hidden;
-    QString name;
+    char * name;
 public:
-    explicit Card(Cards CardId, CardColour colour, bool hidden, QString name);
+    explicit Card(Cards CardId, CardColour colour, bool hidden, char * name);
     explicit Card(int ID);
     explicit Card(const Card & otherone);
 
@@ -40,7 +42,7 @@ public:
      * @param name
      * Name of card
      */
-    void SetName(QString name);
+    void SetName(char * name);
 
     void SetCardValue(Cards value);
 
@@ -52,7 +54,7 @@ public:
      * @return
      * Property name
      */
-    QString GetName() const;
+    char * GetName() const;
 
     /**
      * @brief iGetCardValue

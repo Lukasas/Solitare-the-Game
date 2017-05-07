@@ -19,12 +19,7 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::Loading()
-{
-
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event)
+void MainWindow::resizeEvent(QResizeEvent *)
 {
     view->fitInView(scene_1.sceneRect(), Qt::KeepAspectRatio);
 }
