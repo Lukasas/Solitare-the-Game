@@ -112,6 +112,8 @@ public:
      */
     bool CanBePlaced(const Card& OnThisCard) const;
 
+    bool CanBeStored(const Card& OnThisCard) const;
+
     bool IsHidden() const;
 
     void SetHidden(bool h);

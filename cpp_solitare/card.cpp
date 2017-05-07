@@ -87,11 +87,14 @@ bool Card::CompareColours(const Card & other) const
 bool Card::CanBePlaced(const Card & OnThisCard) const
 {
     if (Compare(OnThisCard) == 1 && !CompareColours(OnThisCard))
-    {
-        qDebug("Can be placed");
+        return true;    
+    return false;
+}
+
+bool Card::CanBeStored(const Card &OnThisCard) const
+{
+    if (Compare(OnThisCard) == -1 && colour == OnThisCard.iGetCardColour())
         return true;
-    }
-    qDebug("Cant be placed");
     return false;
 }
 

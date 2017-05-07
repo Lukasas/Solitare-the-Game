@@ -135,6 +135,16 @@ bool cGameBoard::CanBeMovedToList(int CDlistID, Card *c)
     return c->CanBePlaced(*laying);
 }
 
+bool cGameBoard::CanBeMovedToSlot(int SlotID, Card *c)
+{
+    if (Slots[SlotID].size() == 0)
+    {
+        return c->IsAce();
+    }
+    Card * laying = Slots[SlotID][Slots[SlotID].size() - 1];
+    return c->CanBeStored(*laying);
+}
+
 bool cGameBoard::ShowCard(int CDlistID, int cardPos)
 {
     if (!CanBeShown(CDlistID, cardPos))
@@ -192,11 +202,23 @@ bool cGameBoard::EmptyPack() const
     return Pack.size() == 0;
 }
 
+bool cGameBoard::MoveCardToSlotFromPack(int SlotID)
+{
+    if (!CanBeMovedToSlot(SlotID, PackCard))
+    {
+        return false;
+    }
+
+    Slots[SlotID].push_back(PackCard);
+    PackCard = 0;
+    gameEndedCheck();
+    return true;
+}
+
 bool cGameBoard::MoveCardToListFromPack(int CDlistID)
 {
     if (!CanBeMovedToList(CDlistID, PackCard))
     {
-        qDebug("Cant be moved to list");
         return false;
     }
     CDlist[CDlistID].push_back(PackCard);
@@ -206,19 +228,34 @@ bool cGameBoard::MoveCardToListFromPack(int CDlistID)
     return true;
 }
 
-bool cGameBoard::MoCaToLiFrLi(int CDlistID, int cardID, int ToCDlistID)
+bool cGameBoard::MoCaToSlFrLi(int CDlistID, int cardID, int SlotID)
 {
     if (!CanBeMovedFromList(CDlistID, cardID))
+        return false;
+
+    if (!CanBeMovedToSlot(SlotID, GetCardFromList(CDlistID, cardID)))
     {
-        qDebug("Cant be moved from list");
         return false;
     }
 
-    if (!CanBeMovedToList(ToCDlistID, GetCardFromList(CDlistID, cardID)))
-    {
-        qDebug("Cant be moved to list");
+    Slots[SlotID].push_back(CDlist[CDlistID][cardID]);
+    CDlist[CDlistID].erase(CDlist[CDlistID].begin() + cardID);
+    gameEndedCheck();
+    return true;
+}
+
+bool cGameBoard::MoveCardToSlotFromList(CardPos card, int SlotID)
+{
+    return MoCaToSlFrLi(card.ListID, card.TopPos, SlotID);
+}
+
+bool cGameBoard::MoCaToLiFrLi(int CDlistID, int cardID, int ToCDlistID)
+{
+    if (!CanBeMovedFromList(CDlistID, cardID))
         return false;
-    }
+
+    if (!CanBeMovedToList(ToCDlistID, GetCardFromList(CDlistID, cardID)))
+        return false;
 
     for (int pos = cardID; pos < CDlist[CDlistID].size(); pos++)
     {
@@ -234,6 +271,21 @@ bool cGameBoard::MoveCardToListFromList(CardPos card, int toList)
     return MoCaToLiFrLi(card.ListID, card.TopPos, toList);
 }
 
+
+
+bool cGameBoard::MoveCardToListFromSlot(int SlotID, int ListID)
+{
+    if (!CanBeMovedToList(ListID, GetTopCardFromSlot(SlotID)))
+    {
+        return false;
+    }
+
+    CDlist[ListID].push_back(GetTopCardFromSlot(SlotID));
+    Slots[SlotID].pop_back();
+
+    return true;
+}
+
 std::vector<Card *> cGameBoard::FindChildrenOfCard(CardPos c)
 {
     std::vector<Card *> childs;
@@ -242,6 +294,11 @@ std::vector<Card *> cGameBoard::FindChildrenOfCard(CardPos c)
         childs.push_back(CDlist[c.ListID][pos]);
     }
     return childs;
+}
+
+Card *cGameBoard::GetTopCardFromSlot(int SlotID)
+{
+    return Slots[SlotID][Slots[SlotID].size() - 1];
 }
 
 std::vector<Card *> cGameBoard::GetCardList(int CDlistID)

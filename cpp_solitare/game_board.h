@@ -147,6 +147,8 @@ public:
 
     bool CanBeMovedToList(int CDlistID, Card * c);
 
+    bool CanBeMovedToSlot(int SlotID, Card * c);
+
     /**
      * @brief ShowCard
      * Turns the card / shows it
@@ -195,7 +197,7 @@ public:
      * @param SlotID
      * Slot ID to move card in (0 - 3)
      * @return
-     * Return true if the move was successfull
+     * Returns true if the move was successfull
      */
     bool MoveCardToSlotFromPack(int SlotID);
 
@@ -205,7 +207,7 @@ public:
      * @param CDlistID
      * List ID (0-7)
      * @return
-     * Return true if the move was successfull
+     * Returns true if the move was successfull
      */
     bool MoveCardToListFromPack(int CDlistID);
 
@@ -219,7 +221,7 @@ public:
      * @param SlotID
      * Slot Position (0 - 3)
      * @return
-     * Return true if the move was successfull
+     * Returns true if the move was successfull
      */
     bool MoCaToSlFrLi(int CDlistID, int cardID, int SlotID);
 
@@ -231,7 +233,7 @@ public:
      * @param SlotID
      * Slot Position (0 - 3)
      * @return
-     * Return true if the move was successfull
+     * Returns true if the move was successfull
      */
     bool MoveCardToSlotFromList(CardPos card, int SlotID);
 
@@ -245,7 +247,7 @@ public:
      * @param ToCDlistID
      * ID of list to put the card
      * @return
-     * Return true if the move was successfull
+     * Returns true if the move was successfull
      */
     bool MoCaToLiFrLi(int CDlistID, int cardID, int ToCDlistID);
 
@@ -257,9 +259,21 @@ public:
      * @param toList
      * ID of list
      * @return
-     * Return true if the move was successfull
+     * Returns true if the move was successfull
      */
     bool MoveCardToListFromList(CardPos card, int toList);
+
+    /**
+     * @brief MoveCardToListFromSlot
+     * Moves a card from the final slot to list
+     * @param SlotID
+     * ID of slot
+     * @param ListID
+     * ID of list
+     * @return
+     * Returns true if the move was sucessfull
+     */
+    bool MoveCardToListFromSlot(int SlotID,  int ListID);
 
     /**
      * @brief FindChildsOfCard

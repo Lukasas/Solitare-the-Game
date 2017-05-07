@@ -109,6 +109,13 @@ carditem *SceneBoard::FindCardByName(QString name)
 void SceneBoard::MoveCard(QString Which, carditem *Where)
 {
     carditem * movingCard = FindCardByName(Which);
+
+    if (movingCard->Equal(*Where))
+        return;
+
+    if (Where->Equal(*packCard))
+        return;
+
     CardPos wherePosition = game->GetCardLocation(Where);
     CardPos movingPosition = game->GetCardLocation(movingCard);
     if (movingPosition.ListID != -1) // Is in list
@@ -131,9 +138,20 @@ void SceneBoard::MoveCard(QString Which, carditem *Where)
                 }
             }
         }
-        else
+        else // Have to be Slot
         {
+            if (movingCard->iGetCardColour() == Where->iGetCardColour())
+            {
+                if (Where->Equal(*packCard))
+                    return;
 
+                if (game->MoveCardToSlotFromList(movingPosition, Where->iGetCardColour()))
+                {
+                    movingCard->setPos(Where->pos());
+                    movingCard->setY(Where->y());
+                    movingCard->setZValue(Where->zValue() + 1 );
+                }
+            }
         }
 
     }
@@ -151,6 +169,28 @@ void SceneBoard::MoveCard(QString Which, carditem *Where)
                     packCard = 0;
                     game->RemoveCardFromPack();
                 }
+            }
+            else // From pack to Slot
+            {
+                if (movingCard->iGetCardColour() == Where->iGetCardColour())
+                {
+                    if (game->MoveCardToSlotFromPack(Where->iGetCardColour()))
+                    {
+                        movingCard->setPos(Where->pos());
+                        movingCard->setY(Where->y());
+                        movingCard->setZValue(Where->zValue() + 1 );
+                    }
+                }
+            }
+
+        }
+        else // Have to be from Slot to List
+        {
+            if (game->MoveCardToListFromSlot(Where->iGetCardColour(), wherePosition.ListID))
+            {
+                movingCard->setPos(Where->pos());
+                movingCard->setY(Where->y());
+                movingCard->setZValue(Where->zValue() + 1 );
             }
         }
     }
@@ -194,6 +234,15 @@ void SceneBoard::MoveCard(QString Which, PlaceForKing *Where)
                 game->RemoveCardFromPack();
             }
         }
+        else // From slot
+        {
+            if (game->MoveCardToListFromSlot(movingCard->iGetCardColour(), Where->GetID()))
+            {
+                movingCard->setPos(Where->pos());
+                movingCard->setY(Where->y());
+                movingCard->setZValue(Where->zValue() + 1 );
+            }
+        }
     }
 }
 
@@ -211,13 +260,12 @@ void SceneBoard::MoveCard(QString Which, FinalPlace *Where)
             movingCard->setY(Where->y());
             movingCard->setZValue(Where->zValue() + 1 );
         }
-
     }
     else
     {
         if (movingCard->Equal(*packCard)) // From pack
         {
-            if (game->MoveCardToListFromPack(Where->GetID()))
+            if (game->MoveCardToSlotFromPack(Where->GetID()))
             {
                 movingCard->setPos(Where->pos());
                 movingCard->setY(Where->y());
@@ -294,11 +342,14 @@ void SceneBoard::DrawLayout()
         yy = 495;
     }
 
+    xx_back = xx + 500;
     float yy_back = 20;
     for (int i = 0; i < 4; i++)
     {
-        PLAYCEHOLDERTYPE * item = new carditem("m");
+        FinalPlace * item = new FinalPlace(this, i);
         item->setPos(xx_back, yy_back);
+        item->setZValue(0);
+        item->setPixmap(GetCardImgById(PLACEHOLDER));
         addItem(item);
         xx_back = xx_back + ww + 18;
     }
