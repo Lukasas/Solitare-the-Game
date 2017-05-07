@@ -42,7 +42,7 @@ Card::Card(Cards CardId, CardColour colour) : value(CardId), colour(colour)
 
 Card::Card(int ID)
 {
-    value = static_cast<Cards>((ID % 14) + 1);
+    value = static_cast<Cards>(((ID-1) % 13)+1);
     colour = static_cast<CardColour>(static_cast<int>(floor((ID - 1) / 13.0f)));
 }
 
@@ -83,6 +83,18 @@ bool Card::CanBePlaced(const Card & OnThisCard) const
         return true;
     return false;
 }
+
+bool Card::IsHidden() const
+{
+    return hidden;
+}
+
+void Card::SetHidden(bool h)
+{
+    hidden = h;
+}
+
+
 /*
 void Card::LoadQPixmap(QString path)
 {

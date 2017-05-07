@@ -27,6 +27,7 @@ class Card
 private:
     Cards value;
     CardColour colour;
+    bool hidden;
 public:
     explicit Card(Cards CardId, CardColour colour);
     explicit Card(int ID);
@@ -79,6 +80,9 @@ public:
      */
     bool CanBePlaced(const Card& OnThisCard) const;
 
+    bool IsHidden() const;
+
+    void SetHidden(bool h);
 };
 
 #endif // CARD_H
