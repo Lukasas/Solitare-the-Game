@@ -1,5 +1,5 @@
 <RCC>
-    <qresource>
+    <qresource prefix="/">
         <file>Resources/ace_C.png</file>
         <file>Resources/ace_D.png</file>
         <file>Resources/ace_H.png</file>
@@ -52,5 +52,7 @@
         <file>Resources/two_D.png</file>
         <file>Resources/two_H.png</file>
         <file>Resources/two_S.png</file>
+        <file>Resources/back.png</file>
+        <file>Resources/placeholder.png</file>
     </qresource>
 </RCC>

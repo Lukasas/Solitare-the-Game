@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     view->fitInView(scene_1.sceneRect(), Qt::KeepAspectRatio);
     view->setAcceptDrops(true);
     setCentralWidget(view);
+    scene_1.StartGame();
+    view->fitInView(scene_1.sceneRect(), Qt::KeepAspectRatio);
 }
 
 

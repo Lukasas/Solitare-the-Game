@@ -10,16 +10,24 @@
 class SceneBoard : public QGraphicsScene
 {
 private:
+
+    float xx, yy, ww, hh;
+
     void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
     cGameBoard * game;
 
-    // 52 - Back | 53 - placeholder
-    QImage *cards[54];
+    // 53 - Back | 0 - placeholder
+    QPixmap *cards[54];
+
 
     void LoadImages();
+    void DrawLayout();
+    void FirstDrawTheGame();
 public:
     SceneBoard();
     void StartGame();
+    void LoadGame(QString GameName);
+
 };
 
 #endif // SCENEBOARD_H

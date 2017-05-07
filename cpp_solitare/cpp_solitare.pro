@@ -30,8 +30,7 @@ SOURCES += main.cpp\
     game_board.cpp \
     carditem.cpp \
     viewboard.cpp \
-    sceneboard.cpp \
-    gamewidget.cpp
+    sceneboard.cpp
 
 HEADERS  += mainwindow.h \
     drawable.h \
@@ -41,8 +40,7 @@ HEADERS  += mainwindow.h \
     coordinates.h \
     carditem.h \
     viewboard.h \
-    sceneboard.h \
-    gamewidget.h
+    sceneboard.h
 
 FORMS    +=
 

@@ -6,7 +6,6 @@
 #include "game_board.h"
 #include "carditem.h"
 #include "sceneboard.h"
-#include "gamewidget.h"
 
 int main(int argc, char *argv[])
 {

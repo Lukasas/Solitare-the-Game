@@ -83,6 +83,8 @@ public:
     bool IsHidden() const;
 
     void SetHidden(bool h);
+
+    int GetID();
 };
 
 #endif // CARD_H

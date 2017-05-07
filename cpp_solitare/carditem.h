@@ -14,6 +14,7 @@ private:
     int zIndex;
     int CDlistID;
     int cardPos;
+
     void dropEvent(QGraphicsSceneDragDropEvent *event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
     void dragLeaveEvent(QGraphicsSceneDragDropEvent * event) override;

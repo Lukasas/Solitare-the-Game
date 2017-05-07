@@ -156,6 +156,11 @@ bool cGameBoard::EmptyPack() const
     return Pack.size() == 0;
 }
 
+std::vector<Card *> cGameBoard::GetCardList(int CDlistID)
+{
+    return CDlist[CDlistID];
+}
+
 cGameBoard::~cGameBoard()
 {
 
