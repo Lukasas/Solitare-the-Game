@@ -78,13 +78,13 @@ void cGameBoard::SaveCurrentState()
     StepBack * backstep = new StepBack;
     for (int i = 0; i < 7; i++)
     {
-        for (int j = 0; j < CDlist[i].size(); j++)
+        for (unsigned int j = 0; j < CDlist[i].size(); j++)
         {
             backstep->CDlist[i].push_back(new Card(*((Card*)CDlist[i].at(j))));
         }
         if (i < 4)
         {
-            for (int j = 0; j < Slots[i].size(); j++)
+            for (unsigned int j = 0; j < Slots[i].size(); j++)
             {
                 backstep->Slots[i].push_back(new Card(*((Card*)Slots[i].at(j))));
             }
@@ -95,7 +95,7 @@ void cGameBoard::SaveCurrentState()
     backstep->Pack = Pack;
     backstep->PackCard = PackCard;
 
-    if (back.size() == 3)
+    if (back.size() == MAX_STEP_BACKS)
     {
         back.erase(back.begin());
     }
@@ -174,10 +174,11 @@ bool cGameBoard::SaveGame(std::string slotID)
     char saver;
     for (int i = 0; i < 7; i++)
     {
-        for (int j = 0; j < CDlist[i].size(); j++)
+        for (unsigned int j = 0; j < CDlist[i].size(); j++)
         {
             saver = ((Card*)CDlist[i].at(j))->GetID();
-            fwrite((char*)&saver, 1, 1, f);
+            if (!fwrite((char*)&saver, 1, 1, f))
+                throw "Could not write !";
             if (((Card*)CDlist[i].at(j))->IsHidden())
                 saver = 0;
             else
@@ -185,55 +186,66 @@ bool cGameBoard::SaveGame(std::string slotID)
             fwrite((char*)&saver, 1, 1, f);
         }
         saver = NEW_LINE_CUSTOM;
-        fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
     }
 
     for (int i = 0; i < 4; i++)
     {
-        for (int j = 0; j < Slots[i].size(); j++)
+        for (unsigned int j = 0; j < Slots[i].size(); j++)
         {
             saver = ((Card*)Slots[i].at(j))->GetID();
-            fwrite((char*)&saver, 1, 1, f);
+            if (!fwrite((char*)&saver, 1, 1, f))
+                throw "Could not write !";
             if (((Card*)Slots[i].at(j))->IsHidden())
                 saver = 0;
             else
                 saver = 1;
-            fwrite((char*)&saver, 1, 1, f);
+            if (!fwrite((char*)&saver, 1, 1, f))
+                throw "Could not write !";
         }
         saver = NEW_LINE_CUSTOM;
-        fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
     }
 
     saver = currentPackCardId;
-    fwrite((char*)&saver, 1, 1, f);
+    if (!fwrite((char*)&saver, 1, 1, f))
+        throw "Could not write !";
 
-    for (int i = 0; i < Pack.size(); i++)
+    for (unsigned int i = 0; i < Pack.size(); i++)
     {
         saver = ((Card*)Pack.at(i))->GetID();
-        fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
         if (((Card*)Pack.at(i))->IsHidden())
             saver = 0;
         else
             saver = 1;
-        fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
     }
     saver = NEW_LINE_CUSTOM;
-    fwrite((char*)&saver, 1, 1, f);
+    if (!fwrite((char*)&saver, 1, 1, f))
+        throw "Could not write !";
 
     if (PackCard)
     {
         saver = PackCard->GetID();
-        fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
         if (PackCard->IsHidden())
             saver = 0;
         else
             saver = 1;
-        fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
     }
     else
     {
         saver = NOCARD;
-        fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
     }
     fclose(f);
     // Saved
@@ -305,7 +317,7 @@ void cGameBoard::AddCard(int CDlistID, Card *card)
 
 
 
-bool cGameBoard::CanBeMovedFromList(int CDlistID, int cardPos)
+bool cGameBoard::CanBeMovedFromList(int CDlistID, unsigned int cardPos)
 {
     if (cardPos >= CDlist[CDlistID].size())
         return false;
@@ -350,7 +362,7 @@ bool cGameBoard::ShowCard(int CDlistID, int cardPos)
     return true;
 }
 
-bool cGameBoard::CanBeShown(int CDlistID, int cardPos)
+bool cGameBoard::CanBeShown(int CDlistID, unsigned int cardPos)
 {
     if ((CDlist[CDlistID].size() - 1) == cardPos)
     {
@@ -377,7 +389,7 @@ CardPos cGameBoard::GetCardLocation(Card *c) const
 {
     for (int packID = 0; packID < 7; packID++)
     {
-        for (int pos = 0; pos < CDlist[packID].size(); pos++)
+        for (unsigned int pos = 0; pos < CDlist[packID].size(); pos++)
         {
             Card * find = (Card*)CDlist[packID][pos];
             if (c->GetName().compare(find->GetName()) == 0)
@@ -449,7 +461,7 @@ bool cGameBoard::MoCaToLiFrLi(int CDlistID, int cardID, int ToCDlistID)
     if (!CanBeMovedToList(ToCDlistID, GetCardFromList(CDlistID, cardID)))
         return false;
     SaveCurrentState();
-    for (int pos = cardID; pos < CDlist[CDlistID].size(); pos++)
+    for (unsigned int pos = cardID; pos < CDlist[CDlistID].size(); pos++)
     {
         CDlist[ToCDlistID].push_back(CDlist[CDlistID][pos]);
     }
@@ -481,7 +493,7 @@ bool cGameBoard::MoveCardToListFromSlot(int SlotID, int ListID)
 std::vector<Card *> cGameBoard::FindChildrenOfCard(CardPos c)
 {
     std::vector<Card *> childs;
-    for (int pos = c.TopPos + 1; pos < CDlist[c.ListID].size(); pos++)
+    for (unsigned int pos = c.TopPos + 1; pos < CDlist[c.ListID].size(); pos++)
     {
         childs.push_back(CDlist[c.ListID][pos]);
     }

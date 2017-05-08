@@ -174,7 +174,7 @@ void SceneBoard::MoveCard(std::string  Which, carditem *Where)
                 movingCard->setY(Where->y() + CARD_OFFSET_Y);
                 movingCard->setZValue(Where->zValue() + 1 );
                 float yy_help = movingCard->y() + CARD_OFFSET_Y;
-                for (int i = 0; i < children.size(); i++)
+                for (unsigned int i = 0; i < children.size(); i++)
                 {
                     carditem * kid = FindCardByName(((Card*)children.at(i))->GetName());
                     kid->setPos(movingCard->x(), yy_help);
@@ -263,7 +263,7 @@ void SceneBoard::MoveCard(std::string Which, PlaceForKing *Where)
             movingCard->setY(Where->y());
             movingCard->setZValue(Where->zValue() + 1 );
             float yy_help = movingCard->y() + CARD_OFFSET_Y;
-            for (int i = 0; i < children.size(); i++)
+            for (unsigned int i = 0; i < children.size(); i++)
             {
                 carditem * kid = FindCardByName(((Card*)children.at(i))->GetName());
                 kid->setPos(movingCard->x(), yy_help);
@@ -408,7 +408,7 @@ void SceneBoard::FirstDrawTheGame()
     for (int i = 0; i < 7; i++)
     {
         std::vector<Card*> list = game->GetCardList(i);
-        for (int cardID = 0; cardID < list.size(); cardID++)
+        for (unsigned int cardID = 0; cardID < list.size(); cardID++)
         {
             carditem * item = new carditem(*list[cardID], this);
 
@@ -426,7 +426,7 @@ void SceneBoard::FirstDrawTheGame()
     for (int i = 0; i < 4; i++)
     {
         std::vector<Card*> Slot = game->GetCardSlot(i);
-        for (int j = 0; j < Slot.size(); j++)
+        for (unsigned int j = 0; j < Slot.size(); j++)
         {
             carditem * item = new carditem(*Slot[j], this);
             item->setPos(X_OFFSET_BEGIN + FINAL_OFFSET_LEFT + i *(CARD_WIDTH + LISTS_OFFSET_LEFT),

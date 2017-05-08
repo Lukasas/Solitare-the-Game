@@ -85,7 +85,7 @@ bool Card::Equal(const Card & other) const
 bool Card::CompareColours(const Card & other) const
 {
     if ((   colour < 2 && other.iGetCardColour() < 2) ||
-            colour > 1 && other.iGetCardColour() > 1)
+        (   colour > 1 && other.iGetCardColour() > 1))
         return true;
     return false;
 

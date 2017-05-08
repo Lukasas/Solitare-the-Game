@@ -6,7 +6,6 @@
 #include "mainwindow.h"
 #include <QApplication>
 
-#include <QWindow>
 #include <time.h>
 #include "game_board.h"
 #include "carditem.h"

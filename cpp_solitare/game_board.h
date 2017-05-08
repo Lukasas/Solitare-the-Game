@@ -41,6 +41,9 @@ struct CardPos
  *
  *
  */
+
+#define MAX_STEP_BACKS 5
+
 class cGameBoard
 {
 private:
@@ -60,7 +63,7 @@ private:
      */
     std::vector<Card*> CDlist[7];
     std::vector<Card*> Slots[4];
-    int currentPackCardId;
+    unsigned int currentPackCardId;
     std::vector<Card*> Pack;
     Card * PackCard;
 
@@ -184,7 +187,7 @@ public:
      * @return
      * Return true if its possible
      */
-    bool CanBeMovedFromList(int CDlistID, int cardPos);
+    bool CanBeMovedFromList(int CDlistID, unsigned int cardPos);
 
     /**
      * @brief CanBeMovedToList
@@ -224,7 +227,7 @@ public:
      * @return
      * Returns true if can, otherwise false
      */
-    bool CanBeShown(int CDlistID, int cardPos);
+    bool CanBeShown(int CDlistID, unsigned int cardPos);
 
     /**
      * @brief RemoveCardFromPack
