@@ -183,7 +183,8 @@ bool cGameBoard::SaveGame(std::string slotID)
                 saver = 0;
             else
                 saver = 1;
-            fwrite((char*)&saver, 1, 1, f);
+        if (!fwrite((char*)&saver, 1, 1, f))
+            throw "Could not write !";
         }
         saver = NEW_LINE_CUSTOM;
         if (!fwrite((char*)&saver, 1, 1, f))
