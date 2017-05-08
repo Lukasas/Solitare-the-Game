@@ -1,3 +1,9 @@
+/**
+  File: card.h
+  Author: Lukáš Chábek (xchabe00)
+  Description: Header file of card.cpp
+  **/
+
 #ifndef CARD_H
 #define CARD_H
 

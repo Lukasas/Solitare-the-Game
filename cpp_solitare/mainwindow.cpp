@@ -1,3 +1,9 @@
+/**
+  File: mainwindow.cpp
+  Author: Lukáš Chábek (xchabe00)
+  Description: The visible canvas for the magic
+  **/
+
 #include "mainwindow.h"
 #include "card.h"
 #include "carditem.h"

@@ -1,3 +1,9 @@
+/**
+  File: game_board.cpp
+  Author: Lukáš Chábek (xchabe00)
+  Description: Handles the whole functionality of the deck. Loading / Saving / Creating new game and so. Has everything that's needed for making a deck.
+  **/
+
 #include "game_board.h"
 
 cGameBoard::cGameBoard()
@@ -161,6 +167,9 @@ bool cGameBoard::SaveGame(std::string slotID)
         slotID += ".game";
 
     FILE * f = fopen(slotID.c_str(), "wb");
+
+    if (f == 0)
+        return false;
 
     char saver;
     for (int i = 0; i < 7; i++)

@@ -1,3 +1,9 @@
+/**
+  File: card.cpp
+  Author: Lukáš Chábek (xchabe00)
+  Description: Handles the basic function of card, holds its value, name, color and state if it's hidden. Does basic comparison between cards.
+  **/
+
 #include "card.h"
 
 #include <string>

@@ -1,3 +1,10 @@
+/**
+  File: game_board.h
+  Author: Lukáš Chábek (xchabe00)
+  Description: Header file of game_board.cpp
+  **/
+
+
 #ifndef GAME_BOARD_H
 #define GAME_BOARD_H
 
@@ -179,8 +186,24 @@ public:
      */
     bool CanBeMovedFromList(int CDlistID, int cardPos);
 
+    /**
+     * @brief CanBeMovedToList
+     * This function needs to be called when someone tries to move one card
+     * @param CDlist
+     * @param c
+     * @return
+     * Return true if its possible
+     */
     bool CanBeMovedToList(int CDlistID, Card * c);
 
+    /**
+     * @brief CanBeMovedToSlot
+     * This function needs to be called when someone tries to move one card
+     * @param SlotID
+     * @param c
+     * @return
+     * Return true if its possible
+     */
     bool CanBeMovedToSlot(int SlotID, Card * c);
 
     /**

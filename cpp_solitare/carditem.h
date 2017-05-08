@@ -1,3 +1,9 @@
+/**
+  File: carditem.h
+  Author: Lukáš Chábek (xchabe00)
+  Description: Header file of carditem.cpp
+  **/
+
 #ifndef CARDITEM_H
 #define CARDITEM_H
 

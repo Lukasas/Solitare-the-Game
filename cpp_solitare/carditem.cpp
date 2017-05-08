@@ -1,3 +1,9 @@
+/**
+  File: carditem.cpp
+  Author: Lukáš Chábek (xchabe00)
+  Description: Handles functionality of physical card on the desk. Also manages its dragging and dropping with showing card.
+  **/
+
 #include "carditem.h"
 #include "sceneboard.h"
 void carditem::dropEvent(QGraphicsSceneDragDropEvent * event)

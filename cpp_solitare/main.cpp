@@ -1,3 +1,8 @@
+/**
+  File: main.cpp
+  Author: Lukáš Chábek (xchabe00)
+  Description: Main file for creating a window.
+  **/
 #include "mainwindow.h"
 #include <QApplication>
 

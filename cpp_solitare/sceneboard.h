@@ -1,3 +1,9 @@
+/**
+  File: scoreboard.h
+  Author: Lukáš Chábek (xchabe00)
+  Description: Header file of scoreboard.cpp
+  **/
+
 #ifndef SCENEBOARD_H
 #define SCENEBOARD_H
 
@@ -45,8 +51,6 @@ class SceneBoard : public QGraphicsScene
 {
 private:
 
-    float xx, yy, ww, hh;
-
     cGameBoard * game;
 
     // 53 - Back | 0 - placeholder
@@ -58,25 +62,103 @@ private:
 
     QPixmap GetCardImgById(int ID);
 
+    /**
+     * @brief LoadImages
+     * Loads all images for the scene
+     */
     void LoadImages();
+
+    /**
+     * @brief DrawLayout
+     * Draws basic layout for the game
+     */
     void DrawLayout();
+
+    /**
+     * @brief FirstDrawTheGame
+     * Redraws whole game from game data
+     */
     void FirstDrawTheGame();
 public:
     SceneBoard();
+    /**
+     * @brief testGameEnded
+     * Checks if the game has ended
+     */
     void testGameEnded();
+
+    /**
+     * @brief StartGame
+     * Starts whole new game
+     */
     void StartGame();
+
+    /**
+     * @brief LoadGame
+     * Loads game from savefile
+     * @param GameName
+     * Path to the save file
+     * @return
+     * True if load was successfull
+     */
     bool LoadGame(std::string GameName);
+
+    /**
+     * @brief SaveGame
+     * Saves game to savefile
+     * @param GameName
+     * Path to the save file
+     * @return
+     * True if save was successfull
+     */
     bool SaveGame(std::string GameName);
+
+    /**
+     * @brief StepBack
+     * Make a Stap Back (basicly undo)
+     */
     void StepBack();
+
+    /**
+     * @brief ClearBoard
+     * Clears the whole board out of cards
+     */
     void ClearBoard();
+
+    /**
+     * @brief PickNewCard
+     * Picks a new card from pack
+     */
     void PickNewCard();
+
+    /**
+     * @brief FindCardByName
+     * Finds a card by it's name
+     * @param name
+     * Name of card
+     * @return
+     * Card item on the scene
+     */
     carditem * FindCardByName(std::string name);
+
+    /**
+     * @brief MoveCard
+     * Tries to move card to (List/Final Slots)
+     * @param Which
+     * Name of card to be moved
+     * @param Where
+     * Place where it sould be
+     */
     void MoveCard(std::string  Which, carditem * Where);
     void MoveCard(std::string  Which, PlaceForKing * Where);
     void MoveCard(std::string  Which, FinalPlace * Where);
-    // Create one for slots !
-    //void MoveCard(carditem * Which, carditem * Where);
 
+    /**
+     * @brief ShowCard
+     * Shows the card (Turns it)
+     * @param which
+     * Card on the battlefield
+     */
     void ShowCard(carditem * which);
 
 };

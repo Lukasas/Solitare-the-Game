@@ -1,3 +1,9 @@
+/**
+  File: sceneboard.h
+  Author: Lukáš Chábek (xchabe00)
+  Description: Handles physical movement and manipulating with the whole visible deck. Creates a man-in-middle between the game it self and canvas.
+  **/
+
 #include "sceneboard.h"
 
 #define CARD_OFFSET_Y 40
@@ -17,9 +23,6 @@
 #define CARD_BACK 53
 #define PLACEHOLDER 0
 
-
-/// Base cards must be named like this:
-/// one_H.png (Heath) one_D.png (Diamond) one_S.png (Spade) one_C.png (Club)
 QString BaseCardPaths[14] =
 {
     "ace", // same for all colours
