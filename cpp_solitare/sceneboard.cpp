@@ -1,9 +1,22 @@
 #include "sceneboard.h"
 
-#define CARD_OFFSET 40
+#define CARD_OFFSET_Y 40
 
+#define CARD_WIDTH 180
+#define CARD_HEIGHT 261
 #define BACK 53
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
+#define LISTS_OFFSET_LEFT 100
+#define X_OFFSET_BEGIN 20
+#define Y_OFFSET_BEGIN 300
+#define PACK_POS_X 20
+#define PACK_POS_Y 20
+#define FINAL_OFFSET_LEFT 600
+
+#define CARD_BACK 53
 #define PLACEHOLDER 0
+
 
 /// Base cards must be named like this:
 /// one_H.png (Heath) one_D.png (Diamond) one_S.png (Spade) one_C.png (Club)
@@ -40,28 +53,61 @@ QPixmap SceneBoard::GetCardImgById(int ID)
 
 SceneBoard::SceneBoard()
 {
-    xx = 20;
-    yy = 495;
-    ww = 180;
-    hh = 261;
+    game = new cGameBoard();
+    packCard = 0;
     LoadImages();
-    DrawLayout();
+}
+
+void SceneBoard::testGameEnded()
+{
+    if (game->gameEndedCheck())
+    {
+        ClearBoard();
+        QFont f("Arial", 200);
+        QGraphicsTextItem * finish = addText("Victory !", f);
+        QRectF test = finish->boundingRect();
+        finish->setPos((width()/2) - (test.width() / 2), height()/2 - (test.height() / 2));
+
+   }
 }
 
 void SceneBoard::StartGame()
 {
-    game = new cGameBoard();
+    ClearBoard();
+    packCard = 0;
     game->GenerateNewGame();
+    DrawLayout();
     FirstDrawTheGame();
 }
 
-void SceneBoard::LoadGame(QString GameName)
+bool SceneBoard::SaveGame(std::string GameName)
 {
-    game = new cGameBoard();
+    return game->SaveGame(GameName);
+}
+
+void SceneBoard::StepBack()
+{
+    ClearBoard();
+    game->MakeStepBack();
+    DrawLayout();
     FirstDrawTheGame();
 }
 
+void SceneBoard::ClearBoard()
+{
+    clear();
+}
 
+bool SceneBoard::LoadGame(std::string GameName)
+{    
+    bool HappyLoad = game->LoadGame(GameName);
+    if (!HappyLoad)
+        return false;
+    ClearBoard();
+    DrawLayout();
+    FirstDrawTheGame();
+    return true;
+}
 
 void SceneBoard::PickNewCard()
 {
@@ -72,7 +118,7 @@ void SceneBoard::PickNewCard()
         {
             c = game->GetPackCard();
             packCard = new carditem(*c, this);
-            packCard->setPos(ww + 40, 20);
+            packCard->setPos(PACK_POS_X * 2 + CARD_WIDTH, PACK_POS_Y);
             packCard->setPixmap(GetCardImgById(c->GetID()));
             addItem(packCard);
         }
@@ -122,15 +168,15 @@ void SceneBoard::MoveCard(std::string  Which, carditem *Where)
             if (game->MoveCardToListFromList(movingPosition, wherePosition.ListID))
             {
                 movingCard->setPos(Where->pos());
-                movingCard->setY(Where->y() + CARD_OFFSET);
+                movingCard->setY(Where->y() + CARD_OFFSET_Y);
                 movingCard->setZValue(Where->zValue() + 1 );
-                float yy_help = movingCard->y() + CARD_OFFSET;
+                float yy_help = movingCard->y() + CARD_OFFSET_Y;
                 for (int i = 0; i < children.size(); i++)
                 {
                     carditem * kid = FindCardByName(((Card*)children.at(i))->GetName());
                     kid->setPos(movingCard->x(), yy_help);
                     kid->setZValue(movingCard->zValue() + (i + 1));
-                    yy_help += CARD_OFFSET;
+                    yy_help += CARD_OFFSET_Y;
                 }
             }
         }
@@ -160,7 +206,7 @@ void SceneBoard::MoveCard(std::string  Which, carditem *Where)
                 if (game->MoveCardToListFromPack(wherePosition.ListID))
                 {
                     movingCard->setPos(Where->pos());
-                    movingCard->setY(Where->y() + CARD_OFFSET);
+                    movingCard->setY(Where->y() + CARD_OFFSET_Y);
                     movingCard->setZValue(Where->zValue() + 1 );
                     packCard = 0;
                     game->RemoveCardFromPack();
@@ -195,6 +241,8 @@ void SceneBoard::MoveCard(std::string  Which, carditem *Where)
             }
         }
     }
+
+    testGameEnded();
 }
 
 void SceneBoard::MoveCard(std::string Which, PlaceForKing *Where)
@@ -211,13 +259,13 @@ void SceneBoard::MoveCard(std::string Which, PlaceForKing *Where)
             movingCard->setPos(Where->pos());
             movingCard->setY(Where->y());
             movingCard->setZValue(Where->zValue() + 1 );
-            float yy_help = movingCard->y() + CARD_OFFSET;
+            float yy_help = movingCard->y() + CARD_OFFSET_Y;
             for (int i = 0; i < children.size(); i++)
             {
                 carditem * kid = FindCardByName(((Card*)children.at(i))->GetName());
                 kid->setPos(movingCard->x(), yy_help);
                 kid->setZValue(movingCard->zValue() + (i + 1));
-                yy_help += CARD_OFFSET;
+                yy_help += CARD_OFFSET_Y;
             }
         }
 
@@ -245,6 +293,7 @@ void SceneBoard::MoveCard(std::string Which, PlaceForKing *Where)
             }
         }
     }
+    testGameEnded();
 }
 
 void SceneBoard::MoveCard(std::string  Which, FinalPlace *Where)
@@ -276,6 +325,7 @@ void SceneBoard::MoveCard(std::string  Which, FinalPlace *Where)
             }
         }
     }
+    testGameEnded();
 }
 
 void SceneBoard::ShowCard(carditem *which)
@@ -284,7 +334,7 @@ void SceneBoard::ShowCard(carditem *which)
     if (game->CanBeShown(selected.ListID, selected.TopPos))
     {
         which->SetHidden(false);
-        game->ShowCard(selected, true);
+        game->ShowCard(selected);
         which->setPixmap(GetCardImgById(which->GetID()));
     }
 }
@@ -297,7 +347,7 @@ void SceneBoard::LoadImages()
         for (int j = 0; j < 13; j++)
         {
             QString test = ":/Resources/" + BaseCardPaths[j] + charBaseCardColor[i] + ".png";
-            cards[currentID] = new QPixmap(QPixmap(test).scaled(180, 261, Qt::KeepAspectRatio, Qt::FastTransformation));
+            cards[currentID] = new QPixmap(QPixmap(test).scaled(CARD_WIDTH, CARD_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             if (cards[currentID]->width() == 0)
             {
                 qDebug("Error!");
@@ -305,82 +355,95 @@ void SceneBoard::LoadImages()
             currentID++;
         }
     }
-    cards[0] = new QPixmap(QPixmap(":/Resources/placeholder.png").scaled(180, 261, Qt::KeepAspectRatio, Qt::FastTransformation));
-    cards[53] = new QPixmap(QPixmap(":/Resources/back.png").scaled(180, 261, Qt::KeepAspectRatio, Qt::FastTransformation));
+    cards[0] = new QPixmap(QPixmap(":/Resources/placeholder.png").scaled(CARD_WIDTH, CARD_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    cards[53] = new QPixmap(QPixmap(":/Resources/back.png").scaled(CARD_WIDTH, CARD_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-// THIS NEEDS TO BE REPLACED WITH NEW QGraphicsItem !!!
-#define PLAYCEHOLDERTYPE carditem
 void SceneBoard::DrawLayout()
 {
     // RESOLUTION <= Control + F
 
-    // Magic numbers for Scene muhuhahaha
 
-    QGraphicsRectItem * rect = addRect(QRectF(0, 0, 1410, 1080));
+    QGraphicsRectItem * rect = addRect(QRectF(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
     rect->setZValue(0);
 
     PackClick = new CardPackClick(this);
     PackClick->setPixmap(*(cards[53]));
-    PackClick->setPos(20, 20);
+    PackClick->setPos(PACK_POS_X, PACK_POS_Y);
 
 
     QGraphicsPixmapItem *cardHolder = new QGraphicsPixmapItem();
-    cardHolder->setPixmap(*(cards[0]));
-    cardHolder->setPos(ww + 40, 20);
+    cardHolder->setPixmap(GetCardImgById(PLACEHOLDER));
+    cardHolder->setPos(PACK_POS_X * 2 + CARD_WIDTH, PACK_POS_Y);
 
     addItem(PackClick);
     addItem(cardHolder);
-    float xx_back = xx;
+
     for (int i = 0; i < 7; i++)
     {
         PlaceForKing * item = new PlaceForKing(this, i);
         item->setZValue(0);
-        item->setPos(xx_back, yy);
+        item->setPos(X_OFFSET_BEGIN + i *(CARD_WIDTH + LISTS_OFFSET_LEFT),
+                     Y_OFFSET_BEGIN);
         item->setPixmap(GetCardImgById(PLACEHOLDER));
         addItem(item);
-        xx_back = xx_back + ww + 18;
-        yy = 495;
     }
 
-    xx_back = xx + 500;
-    float yy_back = 20;
     for (int i = 0; i < 4; i++)
     {
         FinalPlace * item = new FinalPlace(this, i);
-        item->setPos(xx_back, yy_back);
+        item->setPos(X_OFFSET_BEGIN + FINAL_OFFSET_LEFT + i *(CARD_WIDTH + LISTS_OFFSET_LEFT),
+                     PACK_POS_Y);
         item->setZValue(0);
         item->setPixmap(GetCardImgById(PLACEHOLDER));
         addItem(item);
-        xx_back = xx_back + ww + 18;
     }
 }
 
 void SceneBoard::FirstDrawTheGame()
 {
-    float xx_back = xx;
     for (int i = 0; i < 7; i++)
     {
         std::vector<Card*> list = game->GetCardList(i);
         for (int cardID = 0; cardID < list.size(); cardID++)
         {
             carditem * item = new carditem(*list[cardID], this);
-            CardPos loc = game->GetCardLocation(item);
-            if (loc.ListID != i || loc.TopPos != cardID)
-                throw;
-            item->setPos(xx_back, yy);
+
+            item->setPos(X_OFFSET_BEGIN + i*(CARD_WIDTH + LISTS_OFFSET_LEFT),
+                         Y_OFFSET_BEGIN + cardID * CARD_OFFSET_Y);
             item->setZValue(cardID+1);
-            yy += CARD_OFFSET;
             if (!list[cardID]->IsHidden())
                 item->setPixmap(*(cards[list[cardID]->GetID()]));
             else
                 item->setPixmap(*(cards[53]));
             addItem(item);
         }
+    }
 
+    for (int i = 0; i < 4; i++)
+    {
+        std::vector<Card*> Slot = game->GetCardSlot(i);
+        for (int j = 0; j < Slot.size(); j++)
+        {
+            carditem * item = new carditem(*Slot[j], this);
+            item->setPos(X_OFFSET_BEGIN + FINAL_OFFSET_LEFT + i *(CARD_WIDTH + LISTS_OFFSET_LEFT),
+                         PACK_POS_Y);
+            item->setZValue(j+1);
+            if (!Slot[j]->IsHidden())
+                item->setPixmap(*(cards[Slot[j]->GetID()]));
+            else
+                item->setPixmap(*(cards[53]));
+            addItem(item);
+        }
+    }
 
-        xx_back = xx_back + ww + 18;
-        yy = 495;
+    if (game->GetPackCard() != 0)
+    {
+        Card *c = game->GetPackCard();
+        packCard = new carditem(*c, this);
+        packCard->setPos(PACK_POS_X * 2 + CARD_WIDTH, PACK_POS_Y);
+        packCard->setPixmap(GetCardImgById(c->GetID()));
+        addItem(packCard);
     }
 }
 

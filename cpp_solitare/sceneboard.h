@@ -63,8 +63,12 @@ private:
     void FirstDrawTheGame();
 public:
     SceneBoard();
+    void testGameEnded();
     void StartGame();
-    void LoadGame(QString GameName);
+    bool LoadGame(std::string GameName);
+    bool SaveGame(std::string GameName);
+    void StepBack();
+    void ClearBoard();
     void PickNewCard();
     carditem * FindCardByName(std::string name);
     void MoveCard(std::string  Which, carditem * Where);

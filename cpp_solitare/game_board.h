@@ -7,6 +7,7 @@
 #include <vector>
 #include <random>
 #include <time.h>
+#include <stdio.h>
 
 struct CardPos
 {
@@ -36,33 +37,64 @@ struct CardPos
 class cGameBoard
 {
 private:
+
+    struct StepBack
+    {
+        std::vector<Card*> CDlist[7];
+        std::vector<Card*> Slots[4];
+        int currentPackCardId;
+        std::vector<Card*> Pack;
+        Card * PackCard;
+    };
+
     /**
      * @brief CDlist
      * Card slots
      */
     std::vector<Card*> CDlist[7];
-
-    void RandomizeCards();
-    void FillGame();
-    std::array<int, 52> WholePackOfCards;
     std::vector<Card*> Slots[4];
-
     int currentPackCardId;
     std::vector<Card*> Pack;
-
     Card * PackCard;
 
-    bool ended;
+    std::vector<StepBack*> back;
 
-    void (*f)();
+    void RandomizeCards(int seed);
+    void FillGame();
+
+
+    std::array<int, 52> WholePackOfCards;
+
+public:
+
+    /**
+     * @brief SaveCurrentState
+     * Saves states for stepback function
+     */
+    void SaveCurrentState();
+
+    /**
+     * @brief MakeStepBack
+     * It's undo...
+     */
+    void MakeStepBack();
+
+    /**
+     * @brief GetCardSlot
+     * Returns whole final slot
+     * @param SlotID
+     * Id of slot (0-3)
+     * @return
+     * Returns std::vector<Card*>
+     */
+    std::vector<Card*> GetCardSlot(int SlotID);
+
     /**
      * @brief gameEndedCheck
      * Checks if the game ended
      */
-    void gameEndedCheck();
+    bool gameEndedCheck();
 
-
-public:
     /**
      * @brief GetCardFromList
      * Gets a card from CDlist
@@ -107,15 +139,27 @@ public:
      * @brief GenerateGame
      * Function that generates completly new game
      */
-    void GenerateNewGame();
+    void GenerateNewGame(int seed = (rand() * 1000000));
+
+    /**
+     * @brief SaveGame
+     * Saves the game to selected name
+     * @param slotID
+     * Name of savefile
+     * @return
+     * Return true if save was successfull
+     */
+    bool SaveGame(std::string slotID);
 
     /**
      * @brief LoadGame
      * This function load a saved game
      * @param slotID
-     * ID of save game (1-4)
+     * Name of game
+     * @return
+     * Return true if load was successfull
      */
-    void LoadGame(int slotID);
+    bool LoadGame(std::string slotID);
 
     /**
      * @brief AddCard
@@ -164,14 +208,6 @@ public:
      * Removes card from pack - Card was picked and placed somewhere else
      */
     void RemoveCardFromPack();
-
-    /**
-     * @brief SetEndGameNotify
-     * Sets the end game function that'll be executed when the game ends
-     * @param (*f)()
-     * simple void name() {} function
-     */
-    void SetEndGameNotify(void (*f)());
 
     /**
      * @brief EmptyPack
@@ -294,7 +330,21 @@ public:
      */
     std::vector<Card*> GetCardList(int CDlistID);
 
-    void ShowCard(CardPos c, bool show);
+    /**
+     * @brief ShowCard
+     * Shows card (unhide) at selected position in list
+     * @param c
+     * Card position in list
+     * @param show
+     * True to show / False to hide
+     */
+    void ShowCard(CardPos c);
+
+    /**
+     * @brief ClearGame
+     * Clears all packs and remove all cards from the table
+     */
+    void ClearGame();
 
     ~cGameBoard();
 

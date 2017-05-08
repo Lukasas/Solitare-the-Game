@@ -19,6 +19,8 @@ bool cGameBoard::PickPackCard()
         return false;
     }
 
+    SaveCurrentState();
+
     if (PackCard != 0)
         currentPackCardId++;
 
@@ -29,13 +31,13 @@ bool cGameBoard::PickPackCard()
     return true;
 }
 
-void cGameBoard::RandomizeCards()
+void cGameBoard::RandomizeCards(int seed)
 {
     for (int i = 0; i < 52; i++)
     {
         WholePackOfCards[i] = i+1;
     }
-    shuffle(WholePackOfCards.begin(), WholePackOfCards.end(), std::default_random_engine((unsigned int)time(0)));
+    shuffle(WholePackOfCards.begin(), WholePackOfCards.end(), std::default_random_engine(seed));
 
 }
 
@@ -65,34 +67,225 @@ void cGameBoard::FillGame()
 
 }
 
-void cGameBoard::gameEndedCheck()
+void cGameBoard::SaveCurrentState()
+{
+    StepBack * backstep = new StepBack;
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < CDlist[i].size(); j++)
+        {
+            backstep->CDlist[i].push_back(new Card(*((Card*)CDlist[i].at(j))));
+        }
+        if (i < 4)
+        {
+            for (int j = 0; j < Slots[i].size(); j++)
+            {
+                backstep->Slots[i].push_back(new Card(*((Card*)Slots[i].at(j))));
+            }
+        }
+    }
+
+    backstep->currentPackCardId = currentPackCardId;
+    backstep->Pack = Pack;
+    backstep->PackCard = PackCard;
+
+    if (back.size() == 3)
+    {
+        back.erase(back.begin());
+    }
+    back.push_back(backstep);
+}
+
+void cGameBoard::MakeStepBack()
+{
+    if (back.size() == 0)
+        return;
+    ClearGame();
+    StepBack * backstep = back.back();
+    for (int i = 0; i < 7; i++)
+    {
+        CDlist[i] = backstep->CDlist[i];
+        if (i < 4)
+        {
+            Slots[i] = backstep->Slots[i];
+        }
+    }
+
+    currentPackCardId = backstep->currentPackCardId;
+    Pack = backstep->Pack;
+    PackCard = backstep->PackCard;
+
+    back.pop_back();
+}
+
+std::vector<Card *> cGameBoard::GetCardSlot(int SlotID)
+{
+    return Slots[SlotID];
+}
+
+bool cGameBoard::gameEndedCheck()
 {
     for (int i = 0; i < 7; i++)
     {
         if (CDlist[i].size() != 0)
-            return;
+            return false;
     }
 
     if  (Pack.size() != 0)
-        return;
+        return false;
 
     if (PackCard != 0)
-        return;
+        return false;
 
-    ended = true;
-
-    f();
+    return true;
 }
 
-void cGameBoard::GenerateNewGame()
+void cGameBoard::GenerateNewGame(int seed)
 {
-    RandomizeCards();
+    ClearGame();
+
+    RandomizeCards(seed);
     FillGame();
 }
 
-void cGameBoard::LoadGame(int slotID)
+#define NEW_LINE_CUSTOM 100
+#define NOCARD 101
+bool cGameBoard::SaveGame(std::string slotID)
 {
-    slotID;
+    if (slotID.length() < 6)
+    {
+        return false;
+    }
+
+    if (slotID.compare(slotID.length()-5, 5, ".game") != 0)
+        slotID += ".game";
+
+    FILE * f = fopen(slotID.c_str(), "wb");
+
+    char saver;
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < CDlist[i].size(); j++)
+        {
+            saver = ((Card*)CDlist[i].at(j))->GetID();
+            fwrite((char*)&saver, 1, 1, f);
+            if (((Card*)CDlist[i].at(j))->IsHidden())
+                saver = 0;
+            else
+                saver = 1;
+            fwrite((char*)&saver, 1, 1, f);
+        }
+        saver = NEW_LINE_CUSTOM;
+        fwrite((char*)&saver, 1, 1, f);
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < Slots[i].size(); j++)
+        {
+            saver = ((Card*)Slots[i].at(j))->GetID();
+            fwrite((char*)&saver, 1, 1, f);
+            if (((Card*)Slots[i].at(j))->IsHidden())
+                saver = 0;
+            else
+                saver = 1;
+            fwrite((char*)&saver, 1, 1, f);
+        }
+        saver = NEW_LINE_CUSTOM;
+        fwrite((char*)&saver, 1, 1, f);
+    }
+
+    saver = currentPackCardId;
+    fwrite((char*)&saver, 1, 1, f);
+
+    for (int i = 0; i < Pack.size(); i++)
+    {
+        saver = ((Card*)Pack.at(i))->GetID();
+        fwrite((char*)&saver, 1, 1, f);
+        if (((Card*)Pack.at(i))->IsHidden())
+            saver = 0;
+        else
+            saver = 1;
+        fwrite((char*)&saver, 1, 1, f);
+    }
+    saver = NEW_LINE_CUSTOM;
+    fwrite((char*)&saver, 1, 1, f);
+
+    if (PackCard)
+    {
+        saver = PackCard->GetID();
+        fwrite((char*)&saver, 1, 1, f);
+        if (PackCard->IsHidden())
+            saver = 0;
+        else
+            saver = 1;
+        fwrite((char*)&saver, 1, 1, f);
+    }
+    else
+    {
+        saver = NOCARD;
+        fwrite((char*)&saver, 1, 1, f);
+    }
+    fclose(f);
+    // Saved
+    return true;
+}
+
+bool cGameBoard::LoadGame(std::string slotID)
+{
+    FILE *f = fopen(slotID.c_str(), "rb");
+    if (f == NULL)
+        return false;
+    ClearGame();
+    char loader;
+
+    for (int i = 0; i < 7; i++)
+    {
+        while ((loader = fgetc(f)) != NEW_LINE_CUSTOM)
+        {
+            Card *c = new Card(loader);
+            loader = fgetc(f); // hidden
+            c->SetHidden(loader == 0);
+            CDlist[i].push_back(c);
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        while ((loader = fgetc(f)) != NEW_LINE_CUSTOM)
+        {
+            Card *c = new Card(loader);
+            loader = fgetc(f); // hidden
+            c->SetHidden(loader == 0);
+            Slots[i].push_back(c);
+        }
+    }
+
+    currentPackCardId = fgetc(f);
+
+    while ((loader = fgetc(f)) != NEW_LINE_CUSTOM)
+    {
+        Card *c = new Card(loader);
+        loader = fgetc(f); // hidden
+        c->SetHidden(loader == 0);
+        Pack.push_back(c);
+    }
+
+    loader = fgetc(f); // PackCard
+    if (loader != NOCARD)
+    {
+        Card *c = new Card(loader);
+        loader = fgetc(f); // hidden
+        c->SetHidden(loader == 0);
+        PackCard = c;
+    }
+    else
+    {
+        PackCard = 0;
+    }
+    fclose(f);
+    // Loaded lol
+    return true;
 }
 
 
@@ -186,11 +379,6 @@ CardPos cGameBoard::GetCardLocation(Card *c) const
     return CardPos(-1, -1);
 }
 
-void cGameBoard::SetEndGameNotify(void (*f)())
-{
-    this->f = f;
-}
-
 bool cGameBoard::EmptyPack() const
 {
     return Pack.size() == 0;
@@ -202,7 +390,7 @@ bool cGameBoard::MoveCardToSlotFromPack(int SlotID)
     {
         return false;
     }
-
+    SaveCurrentState();
     Slots[SlotID].push_back(PackCard);
     PackCard = 0;
     gameEndedCheck();
@@ -215,6 +403,7 @@ bool cGameBoard::MoveCardToListFromPack(int CDlistID)
     {
         return false;
     }
+    SaveCurrentState();
     CDlist[CDlistID].push_back(PackCard);
 
     PackCard = 0;
@@ -231,7 +420,7 @@ bool cGameBoard::MoCaToSlFrLi(int CDlistID, int cardID, int SlotID)
     {
         return false;
     }
-
+    SaveCurrentState();
     Slots[SlotID].push_back(CDlist[CDlistID][cardID]);
     CDlist[CDlistID].erase(CDlist[CDlistID].begin() + cardID);
     gameEndedCheck();
@@ -250,7 +439,7 @@ bool cGameBoard::MoCaToLiFrLi(int CDlistID, int cardID, int ToCDlistID)
 
     if (!CanBeMovedToList(ToCDlistID, GetCardFromList(CDlistID, cardID)))
         return false;
-
+    SaveCurrentState();
     for (int pos = cardID; pos < CDlist[CDlistID].size(); pos++)
     {
         CDlist[ToCDlistID].push_back(CDlist[CDlistID][pos]);
@@ -273,7 +462,7 @@ bool cGameBoard::MoveCardToListFromSlot(int SlotID, int ListID)
     {
         return false;
     }
-
+    SaveCurrentState();
     CDlist[ListID].push_back(GetTopCardFromSlot(SlotID));
     Slots[SlotID].pop_back();
 
@@ -300,9 +489,29 @@ std::vector<Card *> cGameBoard::GetCardList(int CDlistID)
     return CDlist[CDlistID];
 }
 
-void cGameBoard::ShowCard(CardPos c, bool show)
+void cGameBoard::ShowCard(CardPos c)
 {
-    GetCardFromList(c.ListID, c.TopPos)->SetHidden(!show);
+    Card *ce = GetCardFromList(c.ListID, c.TopPos);
+    if (ce->IsHidden())
+    {
+        SaveCurrentState();
+        ce->SetHidden(false);
+    }
+}
+
+void cGameBoard::ClearGame()
+{
+    for (int i = 0; i < 7; i++)
+    {
+        if (i < 4)
+        {
+            Slots[i].clear();
+        }
+        CDlist[i].clear();
+    }
+    currentPackCardId = 0;
+    Pack.clear();
+    PackCard = 0;
 }
 
 cGameBoard::~cGameBoard()
