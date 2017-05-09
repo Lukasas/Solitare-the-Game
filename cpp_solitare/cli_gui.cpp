@@ -69,6 +69,7 @@ CLI::CLI(void)
     arrow_pos[0] = 1;
     arrow_pos[1] = 0;
 
+    game_play.GenerateNewGame();
     init_playground();
 }
 
@@ -78,65 +79,101 @@ CLI::CLI(void)
 CLI::~CLI(void)
 {
     // Destroy all sub-windows
-    CARD_SPOT tmp;
     for (int i = 0; i < 7; i++){
-        tmp = game_area[1 - i];
-
-        while( ! tmp.empty()){
-            delwin(tmp.back().CARD_WINDOW);
-            tmp.pop();
-        }
-
+        delwin(game_area[2 + i].CARD_WINDOW);
         if(i != 2){
-            tmp = game_area[2 + i];
-
-            while( ! tmp.empty()){
-                delwin(tmp.back().CARD_WINDOW);
-                tmp.pop();
-            }
+            delwin( game_area[1 - i].CARD_WINDOW);
         }
     }
-
     // End main window
     endwin();
 }
 
-void CLI::card_back(CARD_PLACEHOLDER window)
+void CLI::card_back(CARD_PLACEHOLDER window, int start_row, bool top)
 {
     wattron(window.CARD_WINDOW, COLOR_PAIR(3));
-    for(int i = 1; i < window.window_width - 1; i++){
-        for(int j = 1; j < window.window_height - 1; j++){
+    for(int i = start_row; i < (top ? window.height - 1 : start_row + 1); i++){
+        for(int j = 1; j < window.width - 1; j++){
             mvwaddch(window.CARD_WINDOW, i, j, '?');
         }
     }
     wrefresh(window.CARD_WINDOW);
 }
 
+std::string CLI::get_card_value(Card *details)
+{
+    std::string tmp;
+    switch (details -> iGetCardColour()) {
+        case Heart:
+            tmp = "♥ ";
+            break;
+        case Diamond:
+            tmp = "♦ ";
+            break;
+        case Spade:
+            tmp = "♠ ";
+            break;
+        case Club:
+            tmp = "♣ ";
+            break;
+    }
+
+    switch(details -> iGetCardValue()) {
+        case CACE:
+            tmp += "A";
+            break;
+        case CJ:
+            tmp += "J";
+            break;
+        case CQ:
+            tmp += "Q";
+            break;
+        case CK:
+            tmp += "K";
+            break;
+        default:
+            tmp += std::to_string(details -> iGetCardValue());
+    }
+
+    return tmp;
+}
+
 void CLI::put_card_values(CARD_PLACEHOLDER window)
 {
+    werase(window.CARD_WINDOW);
+    int row = 0;
+    if( ! window.CDList.empty())
+        wresize(window.CARD_WINDOW, window.height + window.CDList.size() - 1, window.width);
+
     wbkgd(window.CARD_WINDOW, COLOR_PAIR(1));
     wattron(window.CARD_WINDOW, COLOR_PAIR(1));
     box(window.CARD_WINDOW, 0, 0);
     wrefresh(window.CARD_WINDOW);
 
-    if(window.blank){
-        return;
-    }
-    else if(window.secret){
-        card_back(window);
-        return;
-    }
+    if(window.CDList.empty()) return;
 
     wbkgd(window.CARD_WINDOW, COLOR_PAIR(3));
     wattron(window.CARD_WINDOW, COLOR_PAIR(1));
     box(window.CARD_WINDOW, 0, 0);
 
-    int ran_num = rand() % 9 + 2;
+    std::string card_val;
+    for(std::vector<Card *>::iterator it = window.CDList.begin(); it != window.CDList.end(); ++it){
+        row++;
+        if((*it) -> IsHidden()){
+            card_back(window, row, (it == window.CDList.end()));
+            continue;
+        }
 
-    std::string card_val = "♣ " + std::to_string(ran_num);
-    wattron(window.CARD_WINDOW, COLOR_PAIR(2));
-    mvwprintw(window.CARD_WINDOW, 1, 1, "%s", card_val.c_str());
-    mvwprintw(window.CARD_WINDOW, window.window_width - 2, window.window_width - card_val.size() + 1, "%s", card_val.c_str());
+        card_val = get_card_value(*it);
+        wattron(window.CARD_WINDOW, ((*it) -> iGetCardColour() < 2 ? COLOR_PAIR(2) : COLOR_PAIR(3)));
+        mvwprintw(window.CARD_WINDOW, row, 1, "%s", card_val.c_str());
+        if(*it == window.CDList.front()){
+            mvwprintw(window.CARD_WINDOW, (window.height - 2) + window.CDList.size() - (window.CDList.empty() ? 0 : 1), window.width - card_val.size() + 1, "%s", card_val.c_str());
+        }
+
+        if( ! window.expanded) break;
+        card_val = "";
+    }
     wrefresh(window.CARD_WINDOW);
 }
 
@@ -147,13 +184,61 @@ WINDOW * CLI::create_card_window(int start_y, int start_x)
     return card;
 }
 
+void CLI::init_playground()
+{
+    int x_shift = x_gap;
+
+    // Create sub-windows for cards
+    for(int i = 0; i < 7; i++){
+        CARD_PLACEHOLDER tmp;
+        tmp.CARD_WINDOW = create_card_window(y_gap * 2 + card_edge_size, x_shift);
+        tmp.CDList = game_play.GetCardList(i);
+        tmp.height = card_edge_size;
+        tmp.width = card_edge_size;
+        tmp.expanded = TRUE;
+        game_area[2 + i] = tmp;
+
+        if(i != 2){
+            CARD_PLACEHOLDER tmp;
+            tmp.height = card_edge_size;
+            tmp.width = card_edge_size;
+            tmp.CARD_WINDOW = create_card_window(y_gap, x_shift);
+            tmp.expanded = FALSE;
+            game_area[1 - i] = tmp;
+        }
+        // Compute gap on x's axis for new card
+        x_shift = x_shift + card_edge_size + 3;
+    }
+
+    update_screen();
+}
+
+void CLI::update_screen()
+{
+    for(int i = 0; i < 7; i++){
+        put_card_values(game_area[2 + i]);
+        if(i != 2){
+            put_card_values(game_area[1 - i]);
+        }
+    }
+}
+
 void CLI::draw_arrow(bool erase)
 {
     // Define letters for arrow
     char left_side = (erase ? ' ' : '/');
     char right_side = (erase ? ' ' : '\\');
 
-    int start_y = (y_gap + card_edge_size) * arrow_pos[0];
+    int win_height;
+    if(arrow_pos[0] == 1){
+        win_height = game_area[arrow_pos[0] - arrow_pos[1]].CDList.size();
+    }
+    else{
+        win_height = game_area[arrow_pos[0] + arrow_pos[1]].CDList.size();
+    }
+
+    win_height -= (win_height > 0 ? 1 : 0);
+    int start_y = ((y_gap + card_edge_size) * arrow_pos[0]) + win_height;
     int start_x = (x_gap + (card_edge_size / 2 - 1)) + (x_gap + card_edge_size) * arrow_pos[1];
 
     mvwaddch(stdscr, start_y, start_x, left_side);
@@ -165,11 +250,12 @@ void CLI::draw_arrow(bool erase)
 
 void CLI::arrow_control()
 {
-    bool picked_card = FALSE;
-
     draw_arrow(FALSE);
     int kb_press;
+    HOLDER tmp_card;
+    bool picked_card = FALSE;
     while((kb_press = getch()) != KEY_F(10)){
+        draw_arrow(FALSE);
         switch(kb_press){
             case KEY_UP:
                 if(arrow_pos[0] == 1) break;
@@ -203,46 +289,32 @@ void CLI::arrow_control()
                 draw_arrow(FALSE);
                 break;
             case KEY_SPACE:
+                if( ! picked_card && game_area[arrow_pos[0] + (arrow_pos[0] == 1 ? (-arrow_pos[1]) : arrow_pos[1])].CDList.empty()){
+                    break;
+                }
+                else if(arrow_pos[0] == 1 && arrow_pos[1] == 0){
+                    if(game_area[1 - arrow_pos[1]].CDList.empty()){
+
+                    }
+                }
+                else if (arrow_pos[0] != 1 && (arrow_pos[1] != 2 || arrow_pos[1] != 0) && ! picked_card){
+                    if(game_area[arrow_pos[0] + (arrow_pos[0] == 1 ? (-arrow_pos[1]) : arrow_pos[1])].CDList.back() -> IsHidden()){
+                        game_area[arrow_pos[0] + (arrow_pos[0] == 1 ? (-arrow_pos[1]) : arrow_pos[1])].CDList.back() -> SetHidden(FALSE);
+                    }
+                    else if ( ! game_area[arrow_pos[0] + (arrow_pos[0] == 1 ? (-arrow_pos[1]) : arrow_pos[1])].CDList.empty()){
+                        tmp_card.old_y = arrow_pos[0];
+                        tmp_card.old_x = arrow_pos[1];
+                        tmp_card.card = game_area[arrow_pos[0] + (arrow_pos[0] == 1 ? (-arrow_pos[1]) : arrow_pos[1])].CDList.back();
+                        game_area[arrow_pos[0] + (arrow_pos[0] == 1 ? (-arrow_pos[1]) : arrow_pos[1])].CDList.pop_back();
+                    }
+                }
+                else if (picked_card){
+                    game_area[tmp_card.old_y + (tmp_card.old_y == 1 ? (-tmp_card.old_x) : tmp_card.old_x)].CDList.push_back(tmp_card.card);
+                }
                 picked_card = (picked_card ? FALSE : TRUE);
                 break;
         }
-        wrefresh(stdscr);
-    }
-}
-
-void CLI::init_playground()
-{
-    int x_shift = x_gap;
-
-    for(int i = 0; i < 7; i++){
-        CARD_PLACEHOLDER tmp;
-        tmp.window_height = card_edge_size;
-        tmp.window_width = card_edge_size;
-        tmp.CARD_WINDOW = create_card_window(y_gap * 2 + card_edge_size, x_shift);
-        tmp.blank = FALSE;
-        tmp.secret = FALSE;
-        game_area[1 - i].push(tmp);
-
-        if(i != 2){
-            CARD_PLACEHOLDER tmp;
-            tmp.window_height = card_edge_size;
-            tmp.window_width = card_edge_size;
-            tmp.CARD_WINDOW = create_card_window(y_gap, x_shift);
-            tmp.blank = (i > 2);
-            tmp.secret = (i == 0);
-            game_area[2 + i].push(tmp);
-        }
-        // Compute gap on x's axis for new card
-        x_shift = x_shift + card_edge_size + 3;
-    }
-
-    for(int i = 0; i < 7; i++){
-        CARD_PLACEHOLDER tmp = game_area[1 - i].back();
-        put_card_values(tmp);
-        if(i != 2){
-            tmp = game_area[2 + i].back();
-            put_card_values(tmp);
-        }
+        update_screen();
     }
 }
 
