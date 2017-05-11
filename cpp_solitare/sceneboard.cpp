@@ -307,6 +307,9 @@ void SceneBoard::MoveCard(std::string  Which, FinalPlace *Where)
     CardPos movingPosition = game->GetCardLocation(movingCard);
     if (movingPosition.ListID != -1) // Is in list
     {
+        std::vector<Card*> children = game->FindChildrenOfCard(movingPosition); // Needs to be here, becouse the position will change
+        if (children.size() > 0)
+            return;
         if (game->MoveCardToSlotFromList(movingPosition, Where->GetID()))
         {
             movingCard->setPos(Where->pos());
