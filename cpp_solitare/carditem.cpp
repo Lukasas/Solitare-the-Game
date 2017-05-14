@@ -45,8 +45,8 @@ void carditem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if (!IsHidden())
     {
         QWidget *supply = (QWidget*)event->widget();
-        QDrag *drag = new QDrag(supply);
-        // QDrag *drag = new QDrag((QObject*)supply); QT > 5.6 ?
+        //QDrag *drag = new QDrag(supply);
+         QDrag *drag = new QDrag((QObject*)supply); //QT > 5.6 ?
 
         QMimeData *mime = new QMimeData;
 

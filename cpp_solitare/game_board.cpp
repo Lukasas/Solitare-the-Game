@@ -503,7 +503,7 @@ std::vector<Card *> cGameBoard::FindChildrenOfCard(CardPos c)
 
 Card *cGameBoard::GetTopCardFromSlot(int SlotID)
 {
-    return Slots[SlotID][Slots[SlotID].size() - 1];
+    return Slots[SlotID].back();
 }
 
 std::vector<Card *> cGameBoard::GetCardList(int CDlistID)

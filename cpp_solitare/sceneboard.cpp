@@ -185,6 +185,9 @@ void SceneBoard::MoveCard(std::string  Which, carditem *Where)
         }
         else // Have to be Slot
         {
+            std::vector<Card*> children = game->FindChildrenOfCard(movingPosition); // Needs to be here, becouse the position will change
+            if (children.size() > 0)
+                return;
             if (movingCard->iGetCardColour() == Where->iGetCardColour())
             {
                 if (packCard != 0 && Where->Equal(*packCard))
@@ -202,7 +205,7 @@ void SceneBoard::MoveCard(std::string  Which, carditem *Where)
     }
     else
     {
-        if (movingCard->Equal(*packCard)) // From pack
+        if (packCard != 0 && movingCard->Equal(*packCard)) // From pack
         {
             if (wherePosition.ListID != -1) // to List !
             {
@@ -235,10 +238,10 @@ void SceneBoard::MoveCard(std::string  Which, carditem *Where)
         {
             if (wherePosition.ListID != -1) // Must be list otherwise ignore
             {
-                if (game->MoveCardToListFromSlot(Where->iGetCardColour(), wherePosition.ListID))
+                if (game->MoveCardToListFromSlot(movingCard->iGetCardColour(), wherePosition.ListID))
                 {
                     movingCard->setPos(Where->pos());
-                    movingCard->setY(Where->y());
+                    movingCard->setY(Where->y() + CARD_OFFSET_Y);
                     movingCard->setZValue(Where->zValue() + 1 );
                 }
             }
