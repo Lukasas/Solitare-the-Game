@@ -305,7 +305,7 @@ void SceneBoard::MoveCard(std::string Which, PlaceForKing *Where)
 void SceneBoard::MoveCard(std::string  Which, FinalPlace *Where)
 {
     carditem * movingCard = FindCardByName(Which);
-    if (!movingCard->IsAce() || movingCard->iGetCardColour() != Where->GetID())
+    if (!movingCard->IsAce() /*|| movingCard->iGetCardColour() != Where->GetID()*/)
         return;
     CardPos movingPosition = game->GetCardLocation(movingCard);
     if (movingPosition.ListID != -1) // Is in list
